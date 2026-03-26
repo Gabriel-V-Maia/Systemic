@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Automax — Oficina Mecânica e Auto Peças em Joinville/SC, diagnóstico computadorizado e peças originais para seu veículo.">
+  <meta name="keywords" content="oficina mecânica, auto peças, Joinville, manutenção automotiva, alinhamento, balanceamento, Automax">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Automax Automotivas">
+  <meta property="og:title" content="Automax — Oficina Mecânica & Auto Peças">
+  <meta property="og:description" content="Peças de qualidade e serviços especializados para o seu veículo em Joinville/SC.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="theme-color" content="#0d0d0d">
+  <title>Automax — Oficina Mecânica & Auto Peças | Joinville/SC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style_homepage.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+  <nav class="site-navbar" id="mainNav" aria-label="Navegação principal">
+    <div class="container-xl">
+      <div class="navbar-inner">
+        <a class="navbar-brand-link" href="/" aria-label="Automax — Página inicial">
+          <span class="brand-auto">AUTO</span><span class="brand-max">MAX</span>
+        </a>
+
+        <ul class="navbar-nav-list d-none d-lg-flex" role="list">
+          <li><a href="/" class="nav-link active" aria-current="page">Início</a></li>
+          <li><a href="/servicos" class="nav-link">Serviços</a></li>
+          <li><a href="/produtos" class="nav-link">Produtos</a></li>
+          <li><a href="#sobre" class="nav-link">Sobre</a></li>
+          <li><a href="https://wa.link/2ub6xt" class="nav-link" target="_blank" rel="noopener noreferrer">Contato</a></li>
+        </ul>
+
+        <div class="navbar-actions d-none d-md-flex">
+          <a href="/auth/login" class="btn-ghost-nav">Entrar</a>
+          <a href="/cadastro" class="btn-red-nav">Cadastrar</a>
+        </div>
+
+        <button class="mobile-toggle d-lg-none" id="mobileToggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Abrir menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+      <div class="container-xl">
+        <ul class="mobile-nav-list" role="list">
+          <li><a href="/" class="mobile-nav-link">Início</a></li>
+          <li><a href="/servicos" class="mobile-nav-link">Serviços</a></li>
+          <li><a href="/produtos" class="mobile-nav-link">Produtos</a></li>
+          <li><a href="#sobre" class="mobile-nav-link">Sobre</a></li>
+          <li><a href="https://wa.link/2ub6xt" class="mobile-nav-link" target="_blank" rel="noopener noreferrer">Contato</a></li>
+        </ul>
+        <div class="mobile-actions">
+          <a href="/auth/login" class="btn-ghost-nav w-100 text-center">Entrar</a>
+          <a href="/cadastro" class="btn-red-nav w-100 text-center">Cadastrar</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="search-strip" role="search" aria-label="Busca de produtos e serviços">
+    <div class="container-xl">
+      <form class="search-form" action="/busca" method="get">
+        <label for="searchInput" class="visually-hidden">Buscar peças, produtos ou serviços</label>
+        <div class="search-inner">
+          <svg class="search-icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" id="searchInput" name="q" class="search-input" placeholder="Buscar peças, óleos, filtros, serviços..." autocomplete="off">
+          <button type="submit" class="search-btn" aria-label="Buscar">Buscar</button>
+        </div>
+        <div class="search-tags" role="group" aria-label="Buscas populares">
+          <span class="search-tag-label" aria-hidden="true">Popular:</span>
+          <a href="/busca?q=filtro+de+ar" class="search-tag">Filtro de ar</a>
+          <a href="/busca?q=oleo+motor" class="search-tag">Óleo motor</a>
+          <a href="/busca?q=velas" class="search-tag">Velas</a>
+          <a href="/busca?q=pastilha+freio" class="search-tag">Freios</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <main id="main-content">
+
+    <section class="hero-section" aria-label="Banner principal">
+      <div class="hero-bg-overlay" aria-hidden="true"></div>
+      <div class="hero-grid-lines" aria-hidden="true"></div>
+      <div class="container-xl">
+        <div class="row align-items-center hero-row">
+          <div class="col-12 col-lg-7">
+            <p class="hero-eyebrow" aria-hidden="true">
+              <span class="eyebrow-dot"></span>
+              Joinville / SC — Desde Março de 2026
+            </p>
+            <h1 class="hero-title">
+              Seu veículo<br>
+              merece o<br>
+              <em class="hero-accent">melhor.</em>
+            </h1>
+            <p class="hero-sub">Oficina especializada com diagnóstico computadorizado, peças originais. Qualidade que você vê, desempenho que você sente.</p>
+            <div class="hero-ctas">
+              <a href="/pedir" class="btn-primary-hero">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 5.477 10 10-4.477 10-10 10z"/><path d="M12 8v4l3 3"/></svg>
+                Agendar Serviço
+              </a>
+              <a href="https://wa.link/2ub6xt" class="btn-outline-hero" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                WhatsApp
+              </a>
+            </div>
+            <div class="hero-stats" role="list" aria-label="Estatísticas da empresa">
+              <div class="hero-stat" role="listitem">
+                <span class="stat-number">15+</span>
+                <span class="stat-label">Anos de experiência</span>
+              </div>
+              <div class="stat-divider" aria-hidden="true"></div>
+              <div class="hero-stat" role="listitem">
+                <span class="stat-number">8K+</span>
+                <span class="stat-label">Clientes atendidos</span>
+              </div>
+              <div class="stat-divider" aria-hidden="true"></div>
+              <div class="hero-stat" role="listitem">
+                <span class="stat-number">98%</span>
+                <span class="stat-label">Índice de satisfação</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+            <div class="hero-card-3d" aria-hidden="true">
+              <img src="assets/ad.png" alt="Advertisiment" role="presentation" width="480" height="520">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-marquee-wrap" aria-hidden="true">
+        <div class="hero-marquee">
+          <div class="marquee-track">
+            <span>MANUTENÇÃO PREVENTIVA</span><span class="marquee-dot">◆</span>
+            <span>SUSPENSÃO &amp; FREIOS</span><span class="marquee-dot">◆</span>
+            <span>SISTEMA ELÉTRICO</span><span class="marquee-dot">◆</span>
+            <span>DIAGNÓSTICO COMPUTADORIZADO</span><span class="marquee-dot">◆</span>
+            <span>AR CONDICIONADO</span><span class="marquee-dot">◆</span>
+            <span>ALINHAMENTO &amp; BALANCEAMENTO</span><span class="marquee-dot">◆</span>
+            <span>TROCA DE ÓLEO</span><span class="marquee-dot">◆</span>
+            <span>MANUTENÇÃO PREVENTIVA</span><span class="marquee-dot">◆</span>
+            <span>SUSPENSÃO &amp; FREIOS</span><span class="marquee-dot">◆</span>
+            <span>DIAGNÓSTICO COMPUTADORIZADO</span><span class="marquee-dot">◆</span>
+            <span>AR CONDICIONADO</span><span class="marquee-dot">◆</span>
+            <span>ALINHAMENTO &amp; BALANCEAMENTO</span><span class="marquee-dot">◆</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!--
+    <section class="trust-bar" aria-label="Diferenciais da empresa">
+      <div class="container-xl">
+        <div class="trust-grid">
+          <div class="trust-item">
+            <div class="trust-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="trust-text">
+              <strong>Garantia de Serviço</strong>
+              <span>90 dias em todas as revisões</span>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="trust-text">
+              <strong>Orçamento em 30min</strong>
+              <span>Diagnóstico rápido e preciso</span>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="trust-text">
+              <strong>Nota Fiscal Garantida</strong>
+              <span>Transparência em todas etapas</span>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div class="trust-text">
+              <strong>Peças Originais</strong>
+              <span>Só marcas referência do mercado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    -->
+
+    <section class="banners-section" aria-label="Destaques e promoções">
+      <div class="container-xl">
+        <div class="row g-3">
+          <div class="col-12 col-md-7">
+            <article class="banner-main" aria-label="Revisão completa com desconto">
+              <img src="https://placehold.co/780x380/111111/cc1c1c?text=REVISÃO+COMPLETA" alt="Promoção de revisão completa — 20% de desconto" width="780" height="380" loading="lazy">
+              <div class="banner-main-content">
+                <span class="banner-tag">Oferta da Semana</span>
+                <h2 class="banner-title">Revisão Completa<br>com 20% OFF</h2>
+                <a href="/pedir" class="btn-primary-sm">Ver condições</a>
+              </div>
+            </article>
+          </div>
+          <div class="col-12 col-md-5">
+            <div class="d-flex flex-column gap-3 h-100">
+              <article class="banner-mini" aria-label="Troca de óleo com revisão grátis">
+                <img src="https://placehold.co/480x175/1a0a0a/ff4444?text=TROCA+DE+ÓLEO" alt="Troca de óleo com revisão grátis" width="480" height="175" loading="lazy">
+                <div class="banner-mini-content">
+                  <span class="banner-tag">Troca de Óleo</span>
+                  <h3 class="banner-mini-title">Revisão grátis<br>na troca</h3>
+                </div>
+              </article>
+              <article class="banner-mini" aria-label="Alinhamento com balanceamento incluso">
+                <img src="https://placehold.co/480x175/0a0a1a/5566ff?text=ALINHAMENTO" alt="Alinhamento com balanceamento incluso" width="480" height="175" loading="lazy">
+                <div class="banner-mini-content">
+                  <span class="banner-tag banner-tag-blue">Alinhamento</span>
+                  <h3 class="banner-mini-title">Balanceamento<br>incluso</h3>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="products-section" aria-labelledby="products-heading">
+      <div class="container-xl">
+        <header class="section-header">
+          <div class="section-eyebrow" aria-hidden="true">
+            <span class="eyebrow-line"></span>
+            <span>Catálogo</span>
+            <span class="eyebrow-line"></span>
+          </div>
+          <h2 class="section-title" id="products-heading">Produtos em Destaque</h2>
+          <p class="section-sub">Peças originais com procedência e garantia de fábrica</p>
+        </header>
+
+        <div class="products-filter" role="group" aria-label="Filtrar produtos por categoria">
+          <button class="filter-btn active" aria-pressed="true" data-filter="all">Todos</button>
+          <button class="filter-btn" aria-pressed="false" data-filter="pecas">Peças</button>
+          <button class="filter-btn" aria-pressed="false" data-filter="fluidos">Fluidos</button>
+          <button class="filter-btn" aria-pressed="false" data-filter="eletrico">Elétrico</button>
+        </div>
+
+        <div class="products-grid" role="list" aria-label="Lista de produtos em destaque">
+
+          <article class="product-card" role="listitem" data-category="eletrico">
+            <div class="product-img-wrap">
+              <img src="https://placehold.co/320x220/1c1c1c/cc1c1c?text=LÂMPADA+H4" alt="Lâmpada H4 para faróis dianteiros" width="320" height="220" loading="lazy">
+              <div class="product-badge" aria-label="Produto mais vendido">⚡ Top venda</div>
+            </div>
+            <div class="product-body">
+              <span class="product-cat-tag">Elétrico</span>
+              <h3 class="product-name">Lâmpada H4</h3>
+              <p class="product-desc">Halogênica de alto desempenho para faróis dianteiros. Maior luminosidade e vida útil prolongada.</p>
+              <div class="product-footer">
+                <span class="product-price" aria-label="Preço: R$ 15,00">R$ 15,00</span>
+                <a href="/produto/8" class="btn-card" aria-label="Ver detalhes da Lâmpada H4">Detalhes</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" role="listitem" data-category="pecas">
+            <div class="product-img-wrap">
+              <img src="https://placehold.co/320x220/1c1c1c/cc1c1c?text=VELA+IGNIÇÃO" alt="Vela de ignição original" width="320" height="220" loading="lazy">
+              <div class="product-badge product-badge-new" aria-label="Produto novo no estoque">✦ Novo</div>
+            </div>
+            <div class="product-body">
+              <span class="product-cat-tag">Peças</span>
+              <h3 class="product-name">Vela de Ignição</h3>
+              <p class="product-desc">Velas originais certificadas para combustão eficiente. Compatível com os principais modelos nacionais.</p>
+              <div class="product-footer">
+                <span class="product-price" aria-label="Preço: R$ 25,00">R$ 25,00</span>
+                <a href="/produto/7" class="btn-card" aria-label="Ver detalhes da Vela de ignição">Detalhes</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" role="listitem" data-category="pecas">
+            <div class="product-img-wrap">
+              <img src="https://placehold.co/320x220/1c1c1c/cc1c1c?text=FILTRO+AR" alt="Filtro de ar para motor" width="320" height="220" loading="lazy">
+            </div>
+            <div class="product-body">
+              <span class="product-cat-tag">Peças</span>
+              <h3 class="product-name">Filtro de Ar</h3>
+              <p class="product-desc">Mantém o motor livre de impurezas e aumenta a eficiência de combustível. Filtragem de alta performance.</p>
+              <div class="product-footer">
+                <span class="product-price" aria-label="Preço: R$ 30,00">R$ 30,00</span>
+                <a href="/produto/2" class="btn-card" aria-label="Ver detalhes do Filtro de ar">Detalhes</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" role="listitem" data-category="fluidos">
+            <div class="product-img-wrap">
+              <img src="https://placehold.co/320x220/1c1c1c/cc1c1c?text=ÓLEO+MOTOR" alt="Óleo de motor sintético 5W-30" width="320" height="220" loading="lazy">
+              <div class="product-badge product-badge-promo" aria-label="Produto em promoção">% Promo</div>
+            </div>
+            <div class="product-body">
+              <span class="product-cat-tag">Fluidos</span>
+              <h3 class="product-name">Óleo Motor 5W-30</h3>
+              <p class="product-desc">Sintético de alto desempenho. Proteção superior em altas temperaturas e partidas a frio.</p>
+              <div class="product-footer">
+                <div class="product-price-stack">
+                  <span class="product-price-old" aria-label="Preço original: R$ 60,00">R$ 60,00</span>
+                  <span class="product-price" aria-label="Preço promocional: R$ 48,00">R$ 48,00</span>
+                </div>
+                <a href="/produto/5" class="btn-card" aria-label="Ver detalhes do Óleo Motor 5W-30">Detalhes</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" role="listitem" data-category="pecas">
+            <div class="product-img-wrap">
+              <img src="https://placehold.co/320x220/1c1c1c/cc1c1c?text=PASTILHA" alt="Pastilha de freio dianteira" width="320" height="220" loading="lazy">
+            </div>
+            <div class="product-body">
+              <span class="product-cat-tag">Peças</span>
+              <h3 class="product-name">Pastilha de Freio</h3>
+              <p class="product-desc">Alta fricção para frenagem precisa, baixo ruído e máxima durabilidade em condições extremas.</p>
+              <div class="product-footer">
+                <span class="product-price" aria-label="Preço: R$ 89,00">R$ 89,00</span>
+                <a href="/produto/3" class="btn-card" aria-label="Ver detalhes da Pastilha de freio">Detalhes</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" role="listitem" data-category="fluidos">
+            <div class="product-img-wrap">
+              <img src="https://placehold.co/320x220/1c1c1c/cc1c1c?text=FLUIDO+FREIO" alt="Fluido de freio DOT 4" width="320" height="220" loading="lazy">
+            </div>
+            <div class="product-body">
+              <span class="product-cat-tag">Fluidos</span>
+              <h3 class="product-name">Fluido de Freio DOT 4</h3>
+              <p class="product-desc">Alta resistência à temperatura e umidade. Compatível com sistemas ABS e convencional.</p>
+              <div class="product-footer">
+                <span class="product-price" aria-label="Preço: R$ 22,00">R$ 22,00</span>
+                <a href="/produto/4" class="btn-card" aria-label="Ver detalhes do Fluido de freio">Detalhes</a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="products-cta-wrap">
+          <a href="/produtos" class="btn-outline-dark">Ver catálogo completo →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="services-section" aria-labelledby="services-heading">
+      <div class="services-bg-text" aria-hidden="true">SERVIÇOS</div>
+      <div class="container-xl">
+        <header class="section-header section-header-dark">
+          <div class="section-eyebrow section-eyebrow-light" aria-hidden="true">
+            <span class="eyebrow-line eyebrow-line-light"></span>
+            <span>O que fazemos</span>
+            <span class="eyebrow-line eyebrow-line-light"></span>
+          </div>
+          <h2 class="section-title section-title-light" id="services-heading">Nossos Serviços</h2>
+          <p class="section-sub section-sub-light">Equipe técnica certificada com equipamentos de última geração</p>
+        </header>
+
+        <div class="services-grid" role="list" aria-label="Lista de serviços oferecidos">
+
+          <article class="service-card" role="listitem">
+            <div class="service-number" aria-hidden="true">01</div>
+            <div class="service-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <h3 class="service-name">Manutenção Preventiva</h3>
+            <p class="service-desc">Revisões periódicas completas, troca de óleo, filtros e verificação de todos os sistemas do veículo.</p>
+            <a href="/servicos" class="service-link" aria-label="Saiba mais sobre Manutenção Preventiva">Saiba mais →</a>
+          </article>
+
+          <article class="service-card" role="listitem">
+            <div class="service-number" aria-hidden="true">02</div>
+            <div class="service-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <h3 class="service-name">Suspensão &amp; Freios</h3>
+            <p class="service-desc">Diagnóstico, reparo e substituição de amortecedores, molas, pastilhas, discos e fluido de freio.</p>
+            <a href="/servicos" class="service-link" aria-label="Saiba mais sobre Suspensão e Freios">Saiba mais →</a>
+          </article>
+
+          <article class="service-card" role="listitem">
+            <div class="service-number" aria-hidden="true">03</div>
+            <div class="service-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h3 class="service-name">Sistema Elétrico</h3>
+            <p class="service-desc">Diagnóstico avançado de falhas elétricas, bateria, alternador, motor de partida e chicotes.</p>
+            <a href="/servicos" class="service-link" aria-label="Saiba mais sobre Sistema Elétrico">Saiba mais →</a>
+          </article>
+
+          <article class="service-card" role="listitem">
+            <div class="service-number" aria-hidden="true">04</div>
+            <div class="service-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+            </div>
+            <h3 class="service-name">Ar Condicionado</h3>
+            <p class="service-desc">Manutenção completa, recarga de gás, limpeza do sistema e substituição de componentes do A/C.</p>
+            <a href="/servicos" class="service-link" aria-label="Saiba mais sobre Ar Condicionado">Saiba mais →</a>
+          </article>
+
+          <article class="service-card" role="listitem">
+            <div class="service-number" aria-hidden="true">05</div>
+            <div class="service-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <h3 class="service-name">Alinhamento &amp; Balanceamento</h3>
+            <p class="service-desc">Equipamentos computadorizados 3D para alinhamento e balanceamento dinâmico de precisão.</p>
+            <a href="/servicos" class="service-link" aria-label="Saiba mais sobre Alinhamento e Balanceamento">Saiba mais →</a>
+          </article>
+
+          <article class="service-card" role="listitem">
+            <div class="service-number" aria-hidden="true">06</div>
+            <div class="service-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3 class="service-name">Diagnóstico Computadorizado</h3>
+            <p class="service-desc">Scanner OBD2 profissional para leitura de falhas, mapeamento eletrônico e reset de módulos.</p>
+            <a href="/servicos" class="service-link" aria-label="Saiba mais sobre Diagnóstico Computadorizado">Saiba mais →</a>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!--
+    <section class="iso-section" id="sobre" aria-labelledby="iso-heading">
+      <div class="container-xl">
+        <div class="row align-items-center g-5">
+          <div class="col-12 col-lg-5">
+            <div class="iso-card-3d" id="isoCard" aria-hidden="true">
+              <img src="https://placehold.co/440x340/0d0d0d/cc1c1c?text=ISO+9001" alt="" role="presentation" width="440" height="340">
+            </div>
+          </div>
+          <div class="col-12 col-lg-7">
+            <div class="section-eyebrow" aria-hidden="true">
+              <span class="eyebrow-line"></span>
+              <span>Qualidade garantida</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    -->
+
+    <section class="cta-section" aria-labelledby="cta-heading">
+      <div class="cta-noise" aria-hidden="true"></div>
+      <div class="container-xl">
+        <div class="cta-inner">
+          <div class="cta-glow" aria-hidden="true"></div>
+          <span class="cta-eyebrow" aria-hidden="true">Pronto para começar?</span>
+          <h2 class="cta-title" id="cta-heading">Cuide do seu veículo<br>com quem entende.</h2>
+          <p class="cta-text">Agende seu horário ou solicite um orçamento sem compromisso. Atendemos segunda a sexta, das 8h às 18h, e sábados das 8h às 12h.</p>
+          <div class="cta-btns">
+            <a href="/pedir" class="btn-light-cta">Solicitar Serviço</a>
+            <a href="https://wa.link/2ub6xt" class="btn-outline-white-cta" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-top">
+      <div class="container-xl">
+        <div class="row g-4">
+          <div class="col-12 col-lg-4">
+            <a class="footer-brand" href="/" aria-label="Automax — ir para página inicial">
+              <span class="brand-auto">AUTO</span><span class="brand-max">MAX</span>
+            </a>
+            <p class="footer-about">Sua oficina e loja de auto peças de confiança em Joinville há mais de alguns meses</p>
+            <div class="footer-socials" role="list" aria-label="Redes sociais da Automax">
+              <a href="https://wa.link/2ub6xt" class="footer-social-btn" role="listitem" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp da Automax">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              </a>
+              <a href="#" class="footer-social-btn" role="listitem" aria-label="Instagram da Automax" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </a>
+              <a href="#" class="footer-social-btn" role="listitem" aria-label="Facebook da Automax" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <h3 class="footer-heading">Navegação</h3>
+            <nav aria-label="Rodapé — links de navegação">
+              <ul class="footer-links" role="list">
+                <li><a href="/" class="footer-link">Início</a></li>
+                <li><a href="/servicos" class="footer-link">Serviços</a></li>
+                <li><a href="/produtos" class="footer-link">Produtos</a></li>
+                <li><a href="/pedir" class="footer-link">Solicitar</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <h3 class="footer-heading">Conta</h3>
+            <nav aria-label="Rodapé — links de conta">
+              <ul class="footer-links" role="list">
+                <li><a href="/auth/login" class="footer-link">Entrar</a></li>
+                <li><a href="/cadastro" class="footer-link">Cadastrar</a></li>
+                <li><a href="https://wa.link/2ub6xt" class="footer-link">Ajuda</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="col-12 col-md-4 col-lg-4">
+            <h3 class="footer-heading">Contato &amp; Horários</h3>
+            <address class="footer-address">
+              <p><strong>Tel:</strong> <a href="tel:+554733334444" class="footer-link">(47) 3333-4444</a></p>
+              <p><strong>Email:</strong> <a href="mailto:contato@automax.com.br" class="footer-link">contato@automax.com.br</a></p>
+              <p><strong>Endereço:</strong> Rua das Peças, 123 — Joinville/SC</p>
+              <p><strong>Seg–Sex:</strong> 8h – 18h &nbsp;|&nbsp; <strong>Sáb:</strong> 8h – 12h</p>
+            </address>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container-xl">
+        <div class="footer-bottom-inner">
+          <p class="footer-copy">© 2025 Automax Automotivas. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const productCards = document.querySelectorAll('.product-card');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        const filter = btn.dataset.filter;
+        productCards.forEach(card => {
+          const show = filter === 'all' || card.dataset.category === filter;
+          card.style.display = show ? '' : 'none';
+          show ? card.removeAttribute('aria-hidden') : card.setAttribute('aria-hidden', 'true');
+        });
+      });
+    });
+
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('nav-scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    const toggle = document.getElementById('mobileToggle');
+    const menu = document.getElementById('mobileMenu');
+    toggle.addEventListener('click', () => {
+      const open = menu.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open);
+      menu.setAttribute('aria-hidden', !open);
+    });
+
+    const isoCard = document.getElementById('isoCard');
+    if (isoCard) {
+      isoCard.addEventListener('mousemove', e => {
+        const r = isoCard.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width - 0.5) * 22;
+        const y = ((e.clientY - r.top) / r.height - 0.5) * -22;
+        isoCard.style.transform = `perspective(600px) rotateX(${y}deg) rotateY(${x}deg) rotateZ(2deg)`;
+      });
+      isoCard.addEventListener('mouseleave', () => {
+        isoCard.style.transform = 'perspective(600px) rotateX(8deg) rotateY(-12deg) rotateZ(2deg)';
+      });
+    }
+  </script>
+</body>
+</html>
