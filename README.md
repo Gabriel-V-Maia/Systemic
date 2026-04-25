@@ -21,7 +21,7 @@ Sistema integrado para gerenciamento da Automax e portal de fornecedores da Flow
 
 Um ano atras, eramos apenas uma equipe de desenvolvedores contratados para atender a **Automax** — uma oficina mecanica movimentada que precisava de um sistema para gerenciar suas operacoes. Entregamos a primeira versao, mas o tempo era curto e as escolhas tecnicas refletiam isso: SQLite, Flask, sessoes simples.
 
-Um ano depois, voltamos diferentes. Voltamos com a **Flowgate** — nossa propria empresa, que agrega multiplas fornecedoras em um unico ponto de acesso. A Automax cresceu, e nosso sistema precisa crescer com ela. Desta vez, fazemos do jeito certo.
+Um ano depois, voltamos diferentes. Voltamos com a **Flowgate** (ainda atuando como Systemic) — nossa propria empresa, que agrega multiplas fornecedoras em um unico ponto de acesso. A Automax cresceu, e nosso sistema precisa crescer com ela. Desta vez, fazemos do jeito certo.
 
 > A Flowgate fornece servicos de pecas e informacoes tecnicas, integrando fornecedoras em uma unica API. A Automax consome esses servicos e ganha uma plataforma renovada para suas operacoes internas.
 
@@ -200,7 +200,7 @@ fix(automax): corrige validacao de ordem de servico duplicada
 <div align="center">
 
 **SENAI — Situacao de Aprendizagem**
-Desenvolvido pela equipe Flowgate
+Desenvolvido pela equipe Systemic
 
 ![Status](https://img.shields.io/badge/status-em_desenvolvimento-yellow?style=flat-square)
 
