@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
 
 :root {
-  --red-vivid:     #FF4D4D;   /* após lightouse: mais luminoso */
+  --red-vivid:     #ac2a2a;   /* após lightouse: mais luminoso */
   --red-dark:      #D32F2F;
 
   --red-glow:      rgba(255, 77, 77, 0.15);
