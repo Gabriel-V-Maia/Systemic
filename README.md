@@ -144,7 +144,7 @@ Systemic/
 | Apoio geral e modelagem de deployment | Gabriel |
 | Configuracao do Nginx e deploy | William + Gabriel |
 | API da Flowgate | William + Gabriel |
-| Rework das paginas HTML/CSS | William + Wellinthon |
+| Rework das paginas HTML/CSS | Iago + Wellinthon |
 | PHP geral (Automax e Flowgate) | Victor Mellos |
 
 > Todos podem e devem contribuir fora de suas areas principais. A distribuicao acima e o plano provisorio.
