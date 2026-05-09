@@ -1,4 +1,5 @@
 <div align="center">
+<img src="./assets/systemic-icon.png" width=250>
 
 # Systemic
 
