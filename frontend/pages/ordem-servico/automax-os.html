@@ -91,12 +91,7 @@
     <span class="tb-cur"><span>Ordens</span> de Serviço</span>
   </nav>
 
-  <!-- Trocar perfil (demo) -->
-  <div class="role-sw" role="group" aria-label="Simular perfil de usuário">
-    <button class="rbtn active" onclick="switchRole('gerente',this)"   aria-pressed="true">Gerente</button>
-    <button class="rbtn"        onclick="switchRole('recepcao',this)"  aria-pressed="false">Recepção</button>
-    <button class="rbtn"        onclick="switchRole('mecanico',this)"  aria-pressed="false">Mecânico</button>
-  </div>
+
 
   <!-- Notificações -->
   <div style="position:relative">
@@ -121,9 +116,6 @@
       Ordens de <span class="pt-acc">Serviço</span>
     </div>
     <div class="ph-actions">
-      <button class="btn btn-outline" onclick="exportarCSV()">
-        <i class="bi bi-download" aria-hidden="true"></i>Exportar CSV
-      </button>
       <button class="btn btn-primary" id="btnNova" onclick="abrirNova()">
         <i class="bi bi-plus-lg" aria-hidden="true"></i>Nova OS
       </button>

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once './libs/router.php';
+require_once './libs/AccessControl.php';
 require_once './auth_controller.php';
 require_once './ProdutoController.php';
 require_once './cadastro_controller.php';
@@ -13,7 +14,7 @@ $router = new Router(__DIR__);
 
 /*
  * Serve uma página HTML com o <base href> correto.
- * Centraliza o padrão repetido em todas as rotas.
+ * Centraliza o padrão repetido em todas as rotas públicas.
  */
 function serve_page(string $base_href, string $file_path): void
 {
@@ -37,18 +38,24 @@ function build_user_initials(string $nome): string
 
 /*
  * Serve uma página protegida injetando os dados do usuário logado como
- * window.__session_user, para que o JS preencha o sidebar corretamente.
+ * window.__session_user, para que o JS preencha o sidebar e aplique
+ * as restrições de UI sem fazer uma segunda requisição ao servidor.
  *
- * Sempre chamar no lugar de serve_page() em rotas que exigem autenticação bem legal.
+ * O campo `permissoes` é um array de strings (ex: ['ordem_servico.visualizar']).
+ * O JS usa can.editar para decidir o que mostrar — mas a proteção real
+ * continua sendo feita pelo PHP em cada rota via AccessControl::exigir_permissao.
  */
 function serve_protected_page(string $base_href, string $file_path): void
 {
     AuthController::exigir_autenticacao();
 
+    $nivel = $_SESSION['nivel_de_acesso'] ?? '';
+
     $user_data = [
-        'nome'     => $_SESSION['funcionario_nome'] ?? '',
-        'nivel'    => $_SESSION['nivel_de_acesso']  ?? '',
-        'iniciais' => build_user_initials($_SESSION['funcionario_nome'] ?? ''),
+        'nome'       => $_SESSION['funcionario_nome'] ?? '',
+        'nivel'      => $nivel,
+        'iniciais'   => build_user_initials($_SESSION['funcionario_nome'] ?? ''),
+        'permissoes' => AccessControl::permissoes_do_nivel($nivel),
     ];
 
     $safe_json = json_encode($user_data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
@@ -118,9 +125,23 @@ $router->get('/produto/:id', function () {
 });
 
 $router->get('/ordem-servico', function () {
+    AccessControl::exigir_permissao('ordem_servico.visualizar');
     serve_protected_page('/pages/ordem-servico/', __DIR__ . '/pages/ordem-servico/automax-os.html');
 });
 
+// ── Rotas de clientes (descomentar ao criar a página) ─────────────────────
+// $router->get('/clientes', function () {
+//     AccessControl::exigir_permissao('clientes.visualizar');
+//     serve_protected_page('/pages/clientes/', __DIR__ . '/pages/clientes/index.html');
+// });
+
+// ── Rotas de estoque (descomentar ao criar a página) ──────────────────────
+// $router->get('/estoque', function () {
+//     AccessControl::exigir_permissao('estoque.visualizar');
+//     serve_protected_page('/pages/estoque/', __DIR__ . '/pages/estoque/index.html');
+// });
+
+// ── Placeholders ──────────────────────────────────────────────────────────
  
 /*
  * GET /api/produto?id=:id

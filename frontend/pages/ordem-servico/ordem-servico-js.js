@@ -1,7 +1,20 @@
 /* ═══════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════ */
-let role   = 'gerente';
+/*
+ * Objeto de permissões de UI — preenchido por build_ui_permissions() no init.
+ * Não consultar window.__session_user diretamente fora dessa função.
+ */
+let can = {
+  visualizar:   false,
+  criar:        false,
+  editar:       false,
+  fechar:       false,
+  excluir:      false,
+  ver_clientes: false,
+  ver_estoque:  false,
+};
+
 let view   = 'table';
 let editId = null;
 let delId  = null;
@@ -100,39 +113,7 @@ let pecasT = [];
 /* ═══════════════════════════════════════════════
    PERFIL (ROLE SWITCH)
 ═══════════════════════════════════════════════ */
-function switchRole(r, btn) {
-  role = r;
-  document.querySelectorAll('.rbtn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
-  btn.classList.add('active');
-  btn.setAttribute('aria-pressed','true');
 
-  const profiles = {
-    gerente:  { n:'Antônio Lima',    i:'AL', pb:'pb-gerente',  l:'Gerente',        av:'av-gerente' },
-    recepcao: { n:'Luciana Ribeiro', i:'LR', pb:'pb-recepcao', l:'Recepcionista',  av:'av-recepcao' },
-    mecanico: { n:'Jonas Pereira',   i:'JP', pb:'pb-mecanico', l:'Mecânico Chefe', av:'av-mecanico' },
-  };
-
-  const d = profiles[r];
-  document.getElementById('sbAv').textContent  = d.i;
-  document.getElementById('sbAv').className    = 'av ' + d.av;
-  document.getElementById('sbName').textContent = d.n;
-  const rb = document.getElementById('sbRole');
-  rb.textContent = d.l;
-  rb.className   = 'pbadge ' + d.pb;
-
-  // Botão Nova OS: gerente e recepção
-  document.getElementById('btnNova').style.display =
-    (r === 'gerente' || r === 'recepcao') ? 'inline-flex' : 'none';
-
-  // Itens de nav por perfil
-  document.querySelectorAll('.rnav').forEach(el => {
-    const show = el.classList.contains('r-' + r) ||
-                 (el.classList.contains('r-g') && r === 'gerente');
-    el.style.display = show ? 'flex' : 'none';
-  });
-
-  renderTbl();
-}
 
 /* ═══════════════════════════════════════════════
    VIEW (TABLE / KANBAN)
@@ -237,8 +218,8 @@ function renderTbl() {
     const venc  = o.prazo && !o.fechamento && new Date(o.prazo) < new Date()
       ? '<i class="bi bi-exclamation-triangle-fill" style="color:var(--rose);font-size:12px;margin-left:4px" title="Prazo vencido" aria-label="Prazo vencido"></i>'
       : '';
-    const canEd  = role === 'gerente';
-    const canDel = role === 'gerente' && o.status !== 'concluida';
+    const canEd  = can.editar;
+    const canDel = can.excluir && o.status !== 'concluida';
 
     return `<tr>
       <td>
@@ -396,7 +377,7 @@ function editarOS(id) {
   document.getElementById('btnTxt').textContent = 'Salvar Alterações';
   document.getElementById('vMsg').classList.remove('show');
 
-  const canC = !['concluida','cancelada'].includes(o.status);
+  const canC = can.fechar && !['concluida','cancelada'].includes(o.status);
   document.getElementById('btnFech').style.display = canC ? 'inline-flex' : 'none';
   document.getElementById('secFech').style.display = 'block';
 
@@ -659,7 +640,7 @@ function verDet(id) {
       </div>
     </div>`;
 
-  document.getElementById('btnEditDet').style.display = role === 'gerente' ? 'inline-flex' : 'none';
+  document.getElementById('btnEditDet').style.display = can.editar ? 'inline-flex' : 'none';
   new bootstrap.Modal(document.getElementById('mDet')).show();
 }
 
@@ -743,24 +724,6 @@ function popVeic(sel = null) {
 }
 
 /* ═══════════════════════════════════════════════
-   EXPORTAR CSV
-═══════════════════════════════════════════════ */
-function exportarCSV() {
-  const data = getFilt();
-  let csv = '#OS,Cliente,Veículo,Tipo,Abertura,Prazo,Fechamento,Mão de Obra,Orçamento,Status\n';
-  data.forEach(o => {
-    const c = cliMap[o.id_cliente]?.nome || '';
-    const v = veicMap[o.id_cliente]?.find(x => x.id === o.id_veiculo)?.label || '';
-    csv += `${o.id_ordem},"${c}","${v}",${o.tipo_ordem},${o.abertura||''},${o.prazo||''},${o.fechamento||''},${o.mao_de_obra},${o.orcamento},${o.status}\n`;
-  });
-  const a = document.createElement('a');
-  a.href     = URL.createObjectURL(new Blob([csv], { type:'text/csv' }));
-  a.download = `automax_os_${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
-  toast('Relatório exportado!', 'ok');
-}
-
-/* ═══════════════════════════════════════════════
    SIDEBAR (mobile)
 ═══════════════════════════════════════════════ */
 function toggleSidebar() {
@@ -815,41 +778,67 @@ function fc(v) {
 document.addEventListener('DOMContentLoaded', () => {
   init_user_display();
   document.getElementById('oAb').value = new Date().toISOString().split('T')[0];
-  // Itens de nav: visibilidade conforme o role real da sessão
-  document.querySelectorAll('.rnav').forEach(el =>
-    el.style.display = el.classList.contains('r-g') ? 'flex' : 'none'
-  );
   renderTbl();
 });
 /* ═══════════════════════════════════════════════
    USUÁRIO DA SESSÃO
 ═══════════════════════════════════════════════ */
 
-/*
- * Mapeia o nivel_de_acesso vindo do PHP para as classes CSS e label do sidebar.
- * Fallback seguro para 'mecanico' caso chegue um valor desconhecido.
- */
 const nivel_para_estilo = {
   gerente:  { av: 'av-gerente',  pb: 'pb-gerente',  label: 'Gerente' },
   recepcao: { av: 'av-recepcao', pb: 'pb-recepcao', label: 'Recepcionista' },
   mecanico: { av: 'av-mecanico', pb: 'pb-mecanico', label: 'Mecânico' },
 };
 
+/*
+ * Lê window.__session_user.permissoes (injetado pelo PHP) e preenche o
+ * objeto global `can` com booleanos prontos para uso no resto do JS.
+ * Um único ponto de manutenção: se uma permissão mudar de nome no PHP,
+ * só este mapeamento precisa ser atualizado.
+ */
+function build_ui_permissions() {
+  const permissoes = window.__session_user?.permissoes ?? [];
+  const has = (p) => permissoes.includes(p);
+
+  can.visualizar   = has('ordem_servico.visualizar');
+  can.criar        = has('ordem_servico.criar');
+  can.editar       = has('ordem_servico.editar');
+  can.fechar       = has('ordem_servico.fechar');
+  can.excluir      = has('ordem_servico.excluir');
+  can.ver_clientes = has('clientes.visualizar');
+  can.ver_estoque  = has('estoque.visualizar');
+}
+
+/*
+ * Aplica as permissões à UI: mostra ou oculta elementos conforme o usuário.
+ * JS é camada de UX — a proteção real é o PHP que não serve a rota.
+ */
+function apply_ui_permissions() {
+  const show = (id, visible) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = visible ? '' : 'none';
+  };
+
+  show('btnNova',    can.criar);
+  show('navClientes', can.ver_clientes);
+  show('navEstoque',  can.ver_estoque);
+}
+
 function init_user_display() {
   const user = window.__session_user;
   if (!user || !user.nome) return;
 
+  build_ui_permissions();
+
   const estilo = nivel_para_estilo[user.nivel] ?? nivel_para_estilo.mecanico;
 
-  document.getElementById('sbAv').textContent  = user.iniciais;
-  document.getElementById('sbAv').className    = 'av ' + estilo.av;
+  document.getElementById('sbAv').textContent   = user.iniciais;
+  document.getElementById('sbAv').className     = 'av ' + estilo.av;
   document.getElementById('sbName').textContent = user.nome;
 
   const role_badge = document.getElementById('sbRole');
   role_badge.textContent = estilo.label;
   role_badge.className   = 'pbadge ' + estilo.pb;
 
-  // Sincroniza a variável global de role com o nível real da sessão,
-  // para que as permissões (editar, excluir, nova OS) reflitam o usuário real.
-  role = user.nivel;
+  apply_ui_permissions();
 }
