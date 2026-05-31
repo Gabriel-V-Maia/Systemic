@@ -356,8 +356,10 @@ function abrirNova() {
     if (el) el.value = '';
   });
   document.getElementById('oOrc').value = '';
-  document.getElementById('oAb').value  = new Date().toISOString().split('T')[0];
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('oAb').value  = hoje;
   document.getElementById('oPr').value  = '';
+  document.getElementById('oPr').min    = hoje;
   document.getElementById('oFech').value = '';
   document.getElementById('oVeic').innerHTML = '<option value="">Selecione um cliente primeiro</option>';
   renderPecas();
@@ -419,6 +421,14 @@ function salvarOS() {
   if (!ab) errs.push('data de abertura');
   if (!pr) errs.push('prazo');
   if (errs.length) { showVali(`Preencha: ${errs.join(', ')}.`); return; }
+
+  const hoje = new Date().toISOString().split('T')[0];
+  if (!editId && pr < hoje) {
+    showVali('O prazo previsto não pode ser uma data passada.'); return;
+  }
+  if (pr < ab) {
+    showVali('O prazo previsto não pode ser anterior à data de abertura.'); return;
+  }
 
   document.getElementById('vMsg').classList.remove('show');
 
