@@ -8,6 +8,9 @@ services:
     volumes:
       - ./frontend:/var/www/html/automax
       - ./flowgate:/var/www/html/flowgate
+      - ./vendor:/var/www/html/vendor
+      - ./composer.json:/var/www/html/composer.json
+      - ./composer.lock:/var/www/html/composer.lock
     depends_on:
       db:
         condition: service_healthy
