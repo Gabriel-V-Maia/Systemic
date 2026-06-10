@@ -147,6 +147,10 @@ Systemic/
 ```bash
 docker compose up -d
 docker compose exec web composer dump-autoload --working-dir=/var/www/html
+
+#ou
+
+docker compose down -v; docker compose up --build -d; docker compose exec web composer dump-autoload --working-dir=/var/www/html
 ```
 
 Acesse `http://localhost:8080` para a Automax e `http://localhost:8081` para a Flowgate.
