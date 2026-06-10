@@ -2,104 +2,141 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/database.php';
+namespace Automax\Controllers;
 
-/*
- * Middleware de autenticação da Flowgate.
- *
- * Clientes enviam a chave no header:
- *   X-Flowgate-Key: <chave-em-texto-puro>
- *
- * O banco armazena o SHA-256 da chave — nunca o valor bruto.
- * A comparação usa hash_equals() para evitar timing attacks.
- *
- * Uso:
- *   ApiAuth::exigir();   // encerra com 401 se inválida
- *   $id = ApiAuth::id_key_atual();  // retorna o id da chave autenticada
- */
-class ApiAuth
+use Automax\Config\Database;
+use Automax\Config\DatabaseException;
+
+class AuthController
 {
-    private static ?int $id_key_autenticado = null;
-
-    public static function exigir(): void
+    public static function handle_login(): void
     {
-        $chave_recebida = self::extrair_chave_do_header();
+        $email = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
+        $senha = trim($_POST['senha'] ?? '');
 
-        if ($chave_recebida === null) {
-            self::recusar(401, 'Header X-Flowgate-Key ausente.');
+        if (empty($email) || empty($senha)) {
+            self::redirect_with_error('/auth/login', 'Preencha o email e a senha.');
         }
 
-        $hash_recebido = hash('sha256', $chave_recebida);
-
-        $registro = self::buscar_chave_no_banco($hash_recebido);
-
-        if ($registro === null || !$registro['ativa']) {
-            self::recusar(401, 'Chave de API inválida ou inativa.');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            self::redirect_with_error('/auth/login', 'Formato de email invÃ¡lido.');
         }
 
-        self::$id_key_autenticado = (int) $registro['id_key'];
+        $funcionario = self::buscar_funcionario_por_email($email);
 
-        self::registrar_log($registro['id_key']);
-    }
+        $hash_dummy   = '$2y$12$invalido.hash.para.timing.constante.AAAAAAAAAAAAAAAAAAA';
+        $hash_real    = $funcionario['senha'] ?? $hash_dummy;
+        $senha_valida = password_verify($senha, $hash_real);
 
-    public static function id_key_atual(): ?int
-    {
-        return self::$id_key_autenticado;
-    }
-
-    // ── Privados ──────────────────────────────────────────────────────────
-
-    private static function extrair_chave_do_header(): ?string
-    {
-        /*
-         * Apache/PHP expõe headers HTTP como variáveis SERVER com prefixo HTTP_.
-         * X-Flowgate-Key → HTTP_X_FLOWGATE_KEY
-         */
-        $valor = $_SERVER['HTTP_X_FLOWGATE_KEY'] ?? '';
-        return $valor !== '' ? $valor : null;
-    }
-
-    private static function buscar_chave_no_banco(string $hash): ?array
-    {
-        try {
-            $db = Database::get_instance();
-            return $db->query_one(
-                'SELECT id_key, ativa FROM api_keys WHERE chave = :chave LIMIT 1',
-                [':chave' => $hash]
-            );
-        } catch (DatabaseException) {
-            return null;
+        if ($funcionario === null || !$senha_valida) {
+            self::redirect_with_error('/auth/login', 'Email ou senha incorretos.');
         }
+
+        self::iniciar_sessao_autenticada($funcionario);
+
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
+        header('Location: /ordem-servico');
+        exit;
     }
 
-    private static function registrar_log(int $id_key): void
+    public static function handle_logout(): void
     {
-        /*
-         * Grava audit trail de forma "best-effort": se falhar,
-         * não interrompe a requisição principal.
-         */
-        try {
-            $db = Database::get_instance();
-            $db->execute(
-                'INSERT INTO consultas_log (id_key, endpoint, parametros, ip)
-                 VALUES (:id_key, :endpoint, :params, :ip)',
-                [
-                    ':id_key'   => $id_key,
-                    ':endpoint' => $_SERVER['REQUEST_URI'] ?? '',
-                    ':params'   => json_encode($_GET),
-                    ':ip'       => $_SERVER['REMOTE_ADDR'] ?? '',
-                ]
-            );
-        } catch (\Throwable) {
-            // silencia — log não pode derrubar a API
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION = [];
+        session_destroy();
+
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
+        header('Location: /auth/login');
+        exit;
+    }
+
+    public static function exigir_autenticacao(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (empty($_SESSION['funcionario_id'])) {
+            if (PHP_SAPI === 'cli') {
+                return;
+            }
+
+            header('Location: /auth/login');
+            exit;
         }
     }
 
-    private static function recusar(int $codigo, string $mensagem): never
+    public static function validate_csrf_token(): void
     {
-        http_response_code($codigo);
-        header('Content-Type: application/json; charset=UTF-8');
-        echo json_encode(['erro' => $mensagem], JSON_UNESCAPED_UNICODE);
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $token_sessao = $_SESSION['csrf_token'] ?? '';
+        $token_post   = $_POST['csrf_token']    ?? '';
+
+        if (!$token_sessao || !hash_equals($token_sessao, $token_post)) {
+            http_response_code(403);
+            header('Content-Type: text/plain; charset=UTF-8');
+            echo 'Requisição inválida.';
+            exit;
+        }
+    }
+
+    private static function buscar_funcionario_por_email(string $email): ?array
+    {
+        $db = Database::get_instance();
+
+        return $db->query_one(
+            'SELECT id_funcionario, nome_funcionario, nivel_de_acesso, senha
+               FROM funcionarios
+              WHERE email = :email
+              LIMIT 1',
+            [':email' => $email]
+        );
+    }
+
+    private static function iniciar_sessao_autenticada(array $funcionario): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start([
+                'cookie_httponly' => true,
+                'cookie_secure'   => true,
+                'cookie_samesite' => 'Strict',
+            ]);
+        }
+
+        session_regenerate_id(true);
+
+        $_SESSION['funcionario_id']   = $funcionario['id_funcionario'];
+        $_SESSION['funcionario_nome'] = $funcionario['nome_funcionario'];
+        $_SESSION['nivel_de_acesso']  = $funcionario['nivel_de_acesso'];
+        $_SESSION['autenticado_em']    = time();
+        $_SESSION['csrf_token']        = bin2hex(random_bytes(32));
+    }
+
+    private static function redirect_with_error(string $destino, string $mensagem): never
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION['flash_error'] = $mensagem;
+
+        if (PHP_SAPI === 'cli') {
+            throw new \RuntimeException("redirect:{$destino}");
+        }
+
+        header("Location: {$destino}");
         exit;
     }
 }
