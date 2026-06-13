@@ -11,6 +11,7 @@ use Automax\Controllers\CadastroController;
 use Automax\Controllers\ProdutoController;
 use Automax\Controllers\FornecedorController;
 use Automax\Controllers\EstoqueController;
+use Automax\Controllers\FuncionariosController;
 use Automax\Controllers\ProdutoNotFoundException;
 use Automax\Config\DatabaseException;
 
@@ -155,6 +156,11 @@ $router->get('/fornecedores', function () {
     serve_protected_page('/pages/fornecedores/', __DIR__ . '/pages/fornecedores/fornecedores.html');
 });
 
+$router->get('/funcionarios', function () {
+    AccessControl::exigir_permissao('funcionarios.visualizar');
+    serve_protected_page('/pages/funcionarios/', __DIR__ . '/pages/funcionarios/funcionarios.html');
+});
+
 $router->get('/estoque', function () {
     AccessControl::exigir_permissao('estoque.visualizar');
     serve_protected_page('/pages/estoque/', __DIR__ . '/pages/estoque/estoque.html');
@@ -212,6 +218,28 @@ $router->patch('/api/fornecedores/:id', function (array $params) {
 
 $router->delete('/api/fornecedores/:id', function (array $params) {
     FornecedorController::deletar($params);
+});
+
+// API de funcionários
+
+$router->get('/api/funcionarios', function () {
+    FuncionariosController::listar();
+});
+
+$router->get('/api/funcionarios/:id', function (array $params) {
+    FuncionariosController::buscar($params);
+});
+
+$router->post('/api/funcionarios', function () {
+    FuncionariosController::criar();
+});
+
+$router->put('/api/funcionarios/:id', function (array $params) {
+    FuncionariosController::atualizar($params);
+});
+
+$router->delete('/api/funcionarios/:id', function (array $params) {
+    FuncionariosController::deletar($params);
 });
 
 // Rotas de cadastro
