@@ -9,13 +9,20 @@ use Automax\Config\DatabaseException;
 
 class AuthController
 {
+    private const MAX_EMAIL_LEN = 255;
+    private const MAX_SENHA_LEN = 128;
+
     public static function handle_login(): void
     {
-        $email = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
-        $senha = trim($_POST['senha'] ?? '');
+        $email = trim((string) ($_POST['email'] ?? ''));
+        $senha = trim((string) ($_POST['senha'] ?? ''));
 
-        if (empty($email) || empty($senha)) {
+        if ($email === '' || $senha === '') {
             self::redirect_with_error('/auth/login', 'Preencha o email e a senha.');
+        }
+
+        if (mb_strlen($email) > self::MAX_EMAIL_LEN || mb_strlen($senha) > self::MAX_SENHA_LEN) {
+            self::redirect_with_error('/auth/login', 'Email ou senha incorretos.');
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -51,9 +58,7 @@ class AuthController
 
     public static function handle_logout(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        self::garantir_sessao();
 
         $_SESSION = [];
         session_destroy();
@@ -68,9 +73,7 @@ class AuthController
 
     public static function exigir_autenticacao(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        self::garantir_sessao();
 
         $autenticado = !empty($_SESSION['funcionario_id']) || !empty($_SESSION['cliente_id']);
 
@@ -86,14 +89,12 @@ class AuthController
 
     public static function validate_csrf_token(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        self::garantir_sessao();
 
         $token_sessao = $_SESSION['csrf_token'] ?? '';
         $token_post   = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 
-        if (!$token_sessao || !hash_equals($token_sessao, $token_post)) {
+        if ($token_sessao === '' || !hash_equals($token_sessao, $token_post)) {
             http_response_code(403);
             header('Content-Type: text/plain; charset=UTF-8');
             echo 'Requisição inválida.';
@@ -143,32 +144,41 @@ class AuthController
     {
         self::abrir_sessao_segura();
 
-        $_SESSION['cliente_id']    = $cliente['id_cliente'];
-        $_SESSION['cliente_nome']  = $cliente['nome_cliente'];
-        $_SESSION['cliente_email'] = $cliente['email'];
-        $_SESSION['tipo_usuario']  = 'cliente';
+        $_SESSION['cliente_id']     = $cliente['id_cliente'];
+        $_SESSION['cliente_nome']   = $cliente['nome_cliente'];
+        $_SESSION['cliente_email']  = $cliente['email'];
+        $_SESSION['tipo_usuario']   = 'cliente';
         $_SESSION['autenticado_em'] = time();
         $_SESSION['csrf_token']     = bin2hex(random_bytes(32));
     }
 
-    private static function abrir_sessao_segura(): void
+    /**
+     * Centraliza o início de sessão garantindo que os parâmetros seguros
+     * do cookie (httponly/secure/samesite) sejam sempre aplicados, mesmo
+     * quando a sessão é iniciada antes do login por validate_csrf_token(),
+     * exigir_autenticacao() ou handle_logout().
+     */
+    private static function garantir_sessao(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
-            session_start([
-                'cookie_httponly' => true,
-                'cookie_secure'   => true,
-                'cookie_samesite' => 'Strict',
+            session_set_cookie_params([
+                'httponly' => true,
+                'secure'   => true,
+                'samesite' => 'Strict',
             ]);
+            session_start();
         }
+    }
 
+    private static function abrir_sessao_segura(): void
+    {
+        self::garantir_sessao();
         session_regenerate_id(true);
     }
 
     private static function redirect_with_error(string $destino, string $mensagem): never
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        self::garantir_sessao();
 
         $_SESSION['flash_error'] = $mensagem;
 
