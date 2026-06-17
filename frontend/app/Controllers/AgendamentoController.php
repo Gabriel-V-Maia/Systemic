@@ -17,6 +17,19 @@ use Automax\Config\DatabaseException;
 class AgendamentoController
 {
     private const TURNOS_VALIDOS = ['manha', 'tarde'];
+    private const MAX_BODY_BYTES = 65536;
+
+    private const MAX_LEN = [
+        'nome'        => 150,
+        'telefone'    => 20,
+        'email'       => 150,
+        'marca'       => 50,
+        'modelo'      => 50,
+        'combustivel' => 30,
+        'servico'     => 100,
+        'sintomas'    => 500,
+        'descricao'   => 1000,
+    ];
 
     public static function criar(): void
     {
@@ -30,7 +43,9 @@ class AgendamentoController
             return;
         }
 
-        $erros = self::validar($body);
+        $dados = self::normalizar($body);
+
+        $erros = self::validar($dados);
         if (!empty($erros)) {
             self::json(422, ['ok' => false, 'erro' => implode(' ', $erros)]);
             return;
@@ -39,7 +54,7 @@ class AgendamentoController
         try {
             $db = Database::get_instance();
 
-            $id_veiculo = self::resolver_veiculo($db, $id_cliente, $body);
+            $id_veiculo = self::resolver_veiculo($db, $id_cliente, $dados['placa']);
 
             $db->execute(
                 'INSERT INTO agendamentos
@@ -51,20 +66,20 @@ class AgendamentoController
                 [
                     ':id_cliente'     => $id_cliente,
                     ':id_veiculo'     => $id_veiculo,
-                    ':nome'           => trim($body['nome']),
-                    ':telefone'       => trim($body['telefone']),
-                    ':email'          => trim($body['email'] ?? '') ?: null,
-                    ':placa'          => strtoupper(trim($body['placa'] ?? '')) ?: null,
-                    ':marca'          => trim($body['marca']),
-                    ':modelo'         => trim($body['modelo']),
-                    ':ano'            => self::ou_null_int($body['ano'] ?? ''),
-                    ':combustivel'    => trim($body['combustivel'] ?? '') ?: null,
-                    ':km'             => self::ou_null_int($body['km'] ?? ''),
-                    ':servico'        => trim($body['servico'] ?? ''),
-                    ':sintomas'       => trim($body['sintomas'] ?? '') ?: null,
-                    ':descricao'      => trim($body['descricao'] ?? '') ?: null,
-                    ':data_preferida' => $body['data_preferida'],
-                    ':turno'          => $body['turno'] ?? null,
+                    ':nome'           => $dados['nome'],
+                    ':telefone'       => $dados['telefone'],
+                    ':email'          => $dados['email'] ?: null,
+                    ':placa'          => $dados['placa'] ?: null,
+                    ':marca'          => $dados['marca'],
+                    ':modelo'         => $dados['modelo'],
+                    ':ano'            => self::ou_null_int($dados['ano']),
+                    ':combustivel'    => $dados['combustivel'] ?: null,
+                    ':km'             => self::ou_null_int($dados['km']),
+                    ':servico'        => $dados['servico'],
+                    ':sintomas'       => $dados['sintomas'] ?: null,
+                    ':descricao'      => $dados['descricao'] ?: null,
+                    ':data_preferida' => $dados['data_preferida'],
+                    ':turno'          => $dados['turno'] ?: null,
                 ]
             );
 
@@ -75,33 +90,74 @@ class AgendamentoController
         }
     }
 
-    private static function validar(array $body): array
+    /**
+     * Normaliza e tipa os campos recebidos antes de validar/persistir,
+     * evitando repetir trim()/strtoupper() em pontos diferentes do fluxo
+     * (o que antes fazia a placa usada no INSERT e na busca de veículo
+     * ficarem normalizadas de formas diferentes).
+     */
+    private static function normalizar(array $body): array
+    {
+        return [
+            'nome'           => trim((string) ($body['nome'] ?? '')),
+            'telefone'       => trim((string) ($body['telefone'] ?? '')),
+            'email'          => trim((string) ($body['email'] ?? '')),
+            'placa'          => strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string) ($body['placa'] ?? ''))),
+            'marca'          => trim((string) ($body['marca'] ?? '')),
+            'modelo'         => trim((string) ($body['modelo'] ?? '')),
+            'ano'            => trim((string) ($body['ano'] ?? '')),
+            'combustivel'    => trim((string) ($body['combustivel'] ?? '')),
+            'km'             => trim((string) ($body['km'] ?? '')),
+            'servico'        => trim((string) ($body['servico'] ?? '')),
+            'sintomas'       => trim((string) ($body['sintomas'] ?? '')),
+            'descricao'      => trim((string) ($body['descricao'] ?? '')),
+            'data_preferida' => trim((string) ($body['data_preferida'] ?? '')),
+            'turno'          => trim((string) ($body['turno'] ?? '')),
+        ];
+    }
+
+    private static function validar(array $d): array
     {
         $erros = [];
 
-        if (empty(trim($body['nome']     ?? ''))) $erros[] = 'Nome é obrigatório.';
-        if (empty(trim($body['telefone'] ?? ''))) $erros[] = 'Telefone é obrigatório.';
-        if (empty(trim($body['marca']    ?? ''))) $erros[] = 'Marca do veículo é obrigatória.';
-        if (empty(trim($body['modelo']   ?? ''))) $erros[] = 'Modelo do veículo é obrigatório.';
+        if ($d['nome'] === '')     $erros[] = 'Nome é obrigatório.';
+        if ($d['telefone'] === '') $erros[] = 'Telefone é obrigatório.';
+        if ($d['marca'] === '')    $erros[] = 'Marca do veículo é obrigatória.';
+        if ($d['modelo'] === '')   $erros[] = 'Modelo do veículo é obrigatório.';
+        if ($d['servico'] === '')  $erros[] = 'Selecione o serviço desejado.';
 
-        $servico = trim($body['servico'] ?? '');
-        if ($servico === '' || mb_strlen($servico) > 100) {
-            $erros[] = 'Selecione o serviço desejado.';
-        }
-
-        $data_preferida = $body['data_preferida'] ?? '';
-        if (!self::data_valida($data_preferida)) {
+        if (!self::data_valida($d['data_preferida'])) {
             $erros[] = 'Data preferida inválida.';
         }
 
-        $turno = $body['turno'] ?? null;
-        if ($turno !== null && $turno !== '' && !in_array($turno, self::TURNOS_VALIDOS, true)) {
+        if ($d['turno'] !== '' && !in_array($d['turno'], self::TURNOS_VALIDOS, true)) {
             $erros[] = 'Turno inválido.';
         }
 
-        $email = $body['email'] ?? '';
-        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($d['email'] !== '' && !filter_var($d['email'], FILTER_VALIDATE_EMAIL)) {
             $erros[] = 'E-mail inválido.';
+        }
+
+        if ($d['telefone'] !== '' && !preg_match('/^[0-9()+\-\s]{8,20}$/', $d['telefone'])) {
+            $erros[] = 'Telefone inválido.';
+        }
+
+        if ($d['placa'] !== '' && !preg_match('/^[A-Z0-9]{7}$/', $d['placa'])) {
+            $erros[] = 'Placa inválida.';
+        }
+
+        if ($d['ano'] !== '' && !preg_match('/^\d{4}$/', $d['ano'])) {
+            $erros[] = 'Ano inválido.';
+        }
+
+        if ($d['km'] !== '' && !preg_match('/^\d{1,7}$/', $d['km'])) {
+            $erros[] = 'Quilometragem inválida.';
+        }
+
+        foreach (self::MAX_LEN as $campo => $tamanho) {
+            if (mb_strlen($d[$campo]) > $tamanho) {
+                $erros[] = "Campo '{$campo}' excede o tamanho máximo permitido.";
+            }
         }
 
         return $erros;
@@ -118,9 +174,8 @@ class AgendamentoController
      * cliente autenticado, vincula o agendamento a esse veículo (id_veiculo).
      * Caso contrário (placa nova ou não informada), retorna null.
      */
-    private static function resolver_veiculo(Database $db, int $id_cliente, array $body): ?int
+    private static function resolver_veiculo(Database $db, int $id_cliente, string $placa): ?int
     {
-        $placa = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $body['placa'] ?? ''));
         if ($placa === '' || $id_cliente <= 0) {
             return null;
         }
@@ -141,7 +196,7 @@ class AgendamentoController
     private static function ler_body(): ?array
     {
         $raw = $GLOBALS['_test_input'] ?? file_get_contents('php://input');
-        if (empty($raw)) return null;
+        if (empty($raw) || strlen($raw) > self::MAX_BODY_BYTES) return null;
 
         $data = json_decode($raw, true);
         return is_array($data) ? $data : null;
@@ -152,7 +207,7 @@ class AgendamentoController
         $token_header = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
         $token_sessao = $_SESSION['csrf_token'] ?? '';
 
-        if (!$token_sessao || !hash_equals($token_sessao, $token_header)) {
+        if ($token_sessao === '' || !hash_equals($token_sessao, $token_header)) {
             self::json(403, ['ok' => false, 'erro' => 'Token inválido.']);
             exit;
         }
