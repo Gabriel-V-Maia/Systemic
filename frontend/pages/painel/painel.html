@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta — AUTO MAX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles/produto.css">
+    <style>
+        body {
+            background-color: var(--carbon);
+            color: var(--text-body);
+            font-family: var(--font-body);
+            padding-top: 56px;
+        }
+
+        .painel-header {
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 32px 0;
+            margin-bottom: 32px;
+        }
+
+        .painel-titulo {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            letter-spacing: 0.04em;
+            color: var(--off-white);
+            margin: 0;
+        }
+
+        .painel-subtitulo {
+            color: var(--text-dim);
+            margin: 4px 0 0;
+        }
+
+        .painel-card {
+            background-color: var(--carbon-light);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .painel-card-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            letter-spacing: 0.03em;
+            color: var(--off-white);
+            margin: 0 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .veiculo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background-color: var(--carbon-mid);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+        }
+
+        .veiculo-info strong {
+            color: var(--off-white);
+            font-family: var(--font-display);
+            letter-spacing: 0.03em;
+        }
+
+        .veiculo-info .placa {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
+        }
+
+        .veiculo-acoes button {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            transition: var(--transition);
+        }
+
+        .veiculo-acoes button:hover {
+            border-color: var(--border-accent);
+            color: var(--off-white);
+        }
+
+        .veiculo-acoes button.excluir:hover {
+            border-color: var(--red-vivid);
+            color: var(--red-vivid);
+        }
+
+        .agendamento-item {
+            padding: 14px 16px;
+            background-color: var(--carbon-mid);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+        }
+
+        .agendamento-item .servico {
+            color: var(--off-white);
+            font-family: var(--font-display);
+            letter-spacing: 0.03em;
+        }
+
+        .agendamento-item .meta {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-family: var(--font-display);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+        }
+
+        .status-badge.confirmado { border-color: var(--red-vivid); color: var(--red-vivid); }
+        .status-badge.concluido  { color: #4ade80; border-color: rgba(74, 222, 128, 0.4); }
+
+        .form-control,
+        .form-select {
+            background-color: var(--carbon-mid);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-body);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background-color: var(--carbon-mid);
+            border-color: var(--red-vivid);
+            color: var(--text-body);
+            box-shadow: 0 0 0 3px var(--red-glow);
+        }
+
+        .form-control::placeholder { color: var(--text-dim); }
+
+        .estado-vazio {
+            color: var(--text-dim);
+            text-align: center;
+            padding: 24px 0;
+        }
+
+        .modal-content {
+            background-color: var(--carbon-light);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-body);
+        }
+
+        .btn-close { filter: invert(1); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4" href="/">AUTO<span class="text-danger">MAX</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Início</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pedir">Agendar serviço</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/painel">Minha conta</a></li>
+                    <li class="nav-item">
+                        <form method="POST" action="/auth/logout" id="formLogout" class="d-inline">
+                            <input type="hidden" name="csrf_token" id="csrfLogout" value="">
+                            <button type="submit" class="nav-link border-0 bg-transparent" style="cursor:pointer">
+                                <i class="bi bi-box-arrow-left"></i> Sair
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="painel-header">
+            <h1 class="painel-titulo">MINHA CONTA</h1>
+            <p class="painel-subtitulo" id="boasVindas">Bem-vindo(a) de volta.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-lg-7">
+                <div class="painel-card">
+                    <h2 class="painel-card-title">
+                        Meus veículos
+                        <button class="btn btn-red btn-sm" id="btnNovoVeiculo">
+                            <i class="fas fa-plus me-1"></i> Adicionar veículo
+                        </button>
+                    </h2>
+
+                    <div id="listaVeiculos">
+                        <p class="estado-vazio">Carregando seus veículos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <div class="painel-card">
+                    <h2 class="painel-card-title">Meus agendamentos</h2>
+
+                    <div id="listaAgendamentos">
+                        <p class="estado-vazio">Carregando seus agendamentos...</p>
+                    </div>
+
+                    <a href="/pedir" class="btn btn-outline-light w-100 mt-2">
+                        <i class="fas fa-calendar-plus me-1"></i> Novo agendamento
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: adicionar/editar veículo -->
+    <div class="modal fade" id="modalVeiculo" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="modalVeiculoTitulo">Adicionar veículo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger small d-none" id="erroVeiculo"></p>
+                    <input type="hidden" id="veiculoId">
+
+                    <div class="mb-3">
+                        <label class="form-label" for="veiculoMarca">Marca</label>
+                        <input type="text" class="form-control" id="veiculoMarca" placeholder="Ex.: Chevrolet" maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="veiculoModelo">Modelo</label>
+                        <input type="text" class="form-control" id="veiculoModelo" placeholder="Ex.: Onix 1.0 Turbo" maxlength="100">
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label" for="veiculoAno">Ano</label>
+                            <input type="text" class="form-control" id="veiculoAno" placeholder="2020" maxlength="9">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label" for="veiculoCor">Cor</label>
+                            <input type="text" class="form-control" id="veiculoCor" placeholder="Ex.: Prata" maxlength="50">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="veiculoPlaca">Placa</label>
+                        <input type="text" class="form-control" id="veiculoPlaca" placeholder="ABC-1D23" maxlength="8" style="text-transform:uppercase">
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-red" id="btnSalvarVeiculo">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: confirmar exclusão -->
+    <div class="modal fade" id="modalExcluir" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Remover veículo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja remover este veículo da sua conta?</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-red" id="btnConfirmarExcluir">Remover</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/pages/painel/painel.js"></script>
+</body>
+</html>
