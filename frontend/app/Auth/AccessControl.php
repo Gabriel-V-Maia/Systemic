@@ -22,6 +22,9 @@ class AccessControl
 
             'estoque.visualizar',
             'estoque.editar',
+
+            'funcionarios.visualizar',
+            'funcionarios.gerenciar',
         ],
 
         'recepcao' => [
