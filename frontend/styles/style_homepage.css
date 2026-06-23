@@ -1574,3 +1574,120 @@ img {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   AVATAR DE SESSÃO NA NAVBAR
+═══════════════════════════════════════════════ */
+
+.nav-user {
+  position: relative;
+}
+
+.nav-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.nav-avatar-btn:hover,
+.nav-avatar-btn:focus-visible {
+  border-color: var(--border-accent);
+  background: var(--red-glow);
+}
+
+.nav-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.nav-avatar-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--chrome-dim);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-avatar-caret {
+  color: var(--chrome-dim);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+
+.nav-user.open .nav-avatar-caret {
+  transform: rotate(180deg);
+}
+
+.nav-user-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 180px;
+  background: var(--carbon-mid);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 0.4rem 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity var(--transition), transform var(--transition);
+  z-index: 1000;
+}
+
+.nav-user.open .nav-user-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.nav-user-dropdown a,
+.nav-user-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--text-body);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+}
+
+.nav-user-dropdown a:hover,
+.nav-user-dropdown button:hover {
+  background: var(--carbon-light);
+  color: var(--chrome);
+}
+
+.nav-user-dropdown .dropdown-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0.3rem 0;
+}
+
+.nav-user-dropdown .dropdown-item-danger {
+  color: var(--red-vivid);
+}
+
+.nav-user-dropdown .dropdown-item-danger:hover {
+  background: rgba(172, 42, 42, 0.15);
+  color: #ff6b6b;
+}

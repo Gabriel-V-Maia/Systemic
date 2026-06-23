@@ -381,7 +381,7 @@ $router->get('/uploads/avatars/:arquivo', function (array $params) {
         exit;
     }
 
-    $caminho = '/var/www/html/uploads/avatars/' . $nome;
+    $caminho = '/var/www/html/automax/uploads/avatars/' . $nome;
 
     if (!file_exists($caminho)) {
         http_response_code(404);

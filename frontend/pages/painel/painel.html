@@ -7,9 +7,8 @@
   <title>Minha Conta — Automax</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/styles/style_homepage.css">
+  <link rel="stylesheet" href="/styles/servicos.css">
   <link rel="stylesheet" href="/styles/painel.css">
 </head>
 <body>
@@ -32,7 +31,7 @@
 
         <div class="navbar-actions d-none d-md-flex">
           <a href="/painel" class="btn-ghost-nav active" aria-current="page">Minha conta</a>
-          <form method="POST" action="/auth/logout" id="formLogout" class="d-inline m-0">
+          <form method="POST" action="/auth/logout" id="formLogout" class="d-inline">
             <input type="hidden" name="csrf_token" id="csrfLogout" value="">
             <button type="submit" class="btn-red-nav" style="border:none;cursor:pointer">Sair</button>
           </form>
@@ -55,9 +54,9 @@
         </ul>
         <div class="mobile-actions">
           <a href="/painel" class="btn-ghost-nav w-100 text-center">Minha conta</a>
-          <form method="POST" action="/auth/logout" id="formLogoutMobile" class="m-0">
+          <form method="POST" action="/auth/logout" id="formLogoutMobile">
             <input type="hidden" name="csrf_token" class="csrf-logout-input" value="">
-            <button type="submit" class="btn-red-nav w-100 text-center" style="border:none;cursor:pointer">Sair</button>
+            <button type="submit" class="btn-red-nav w-100" style="border:none;cursor:pointer">Sair</button>
           </form>
         </div>
       </div>
@@ -66,37 +65,81 @@
 
   <main id="main-content">
 
-    <section class="hero-section painel-hero" aria-label="Minha conta">
-      <div class="hero-bg-overlay" aria-hidden="true"></div>
-      <div class="hero-grid-lines" aria-hidden="true"></div>
+    <section class="page-hero" aria-labelledby="hero-heading">
       <div class="container-xl">
-        <div class="row align-items-center hero-row">
-          <div class="col-12">
-            <p class="hero-eyebrow" aria-hidden="true">
-              <span class="eyebrow-dot"></span>
-              Área do cliente
-            </p>
-            <h1 class="hero-title painel-hero-title">
-              Minha <em class="hero-accent">conta</em>
-            </h1>
-            <p class="hero-sub" id="boasVindas">Gerencie seus veículos e acompanhe seus agendamentos.</p>
+        <button type="button" class="btn-voltar" id="btnVoltar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Voltar
+        </button>
+
+        <div class="page-hero-eyebrow" aria-hidden="true">
+          <span class="eyebrow-dot"></span>
+          Área do cliente
+        </div>
+        <h1 class="page-hero-title" id="hero-heading">
+          Minha<br>
+          <span class="accent">conta</span>
+        </h1>
+        <p class="page-hero-sub" id="boasVindas">
+          Gerencie seus veículos e acompanhe seus agendamentos.
+        </p>
+      </div>
+    </section>
+
+    <section class="pedir-section" aria-labelledby="perfil-heading">
+      <div class="container-xl">
+        <h2 class="visually-hidden" id="perfil-heading">Meu perfil</h2>
+
+        <div class="form-card perfil-card">
+          <p class="form-section-title">Meu perfil</p>
+
+          <div class="perfil-row">
+            <div class="perfil-avatar-wrap">
+              <img id="avatarPerfil" class="perfil-avatar" src="" alt="Foto de perfil" width="96" height="96">
+              <input type="file" id="inputFoto" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+            </div>
+
+            <div class="perfil-info">
+              <strong id="perfilNome">&nbsp;</strong>
+              <span id="perfilEmail" class="perfil-email">&nbsp;</span>
+
+              <div class="perfil-acoes">
+                <button type="button" class="btn-outline btn-sm-compact" id="btnAlterarFoto">
+                  Alterar foto
+                </button>
+                <button type="button" class="btn-text-danger" id="btnRemoverFoto" hidden>
+                  Remover foto
+                </button>
+              </div>
+
+              <p class="form-error" id="erroPerfil" hidden></p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="painel-section">
+    <section class="pedir-section" aria-labelledby="painel-heading">
       <div class="container-xl">
+        <h2 class="visually-hidden" id="painel-heading">Painel da conta</h2>
+
         <div class="row g-4">
 
           <div class="col-12 col-lg-7">
-            <div class="painel-card">
+            <div class="form-card">
               <div class="painel-card-header">
-                <h2 class="painel-card-title">Meus veículos</h2>
-                <button type="button" class="btn-primary-sm" id="btnNovoVeiculo">
+                <p class="form-section-title" style="margin-bottom:0;border-bottom:none;padding-bottom:0;">
+                  Meus veículos
+                </p>
+                <button type="button" class="btn-primary btn-sm-compact" id="btnNovoVeiculo">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                        fill="none" stroke="currentColor" stroke-width="2.5"
-                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:0.35rem">
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
                   </svg>
@@ -111,16 +154,14 @@
           </div>
 
           <div class="col-12 col-lg-5">
-            <div class="painel-card">
-              <div class="painel-card-header">
-                <h2 class="painel-card-title">Meus agendamentos</h2>
-              </div>
+            <div class="form-card">
+              <p class="form-section-title">Meus agendamentos</p>
 
               <div id="listaAgendamentos" class="painel-lista">
                 <p class="estado-vazio">Carregando seus agendamentos...</p>
               </div>
 
-              <a href="/pedir" class="btn-outline-dark w-100 justify-content-center mt-3" style="display:flex;">
+              <a href="/pedir" class="btn-outline w-100 justify-content-center mt-3" style="display:flex;">
                 Novo agendamento
               </a>
             </div>
@@ -140,39 +181,35 @@
         <button type="button" class="painel-modal-close" data-close-modal="modalVeiculo" aria-label="Fechar">&times;</button>
       </div>
       <div class="painel-modal-body">
-        <p class="painel-form-error" id="erroVeiculo" hidden></p>
+        <p class="form-error visible" id="erroVeiculo" hidden></p>
         <input type="hidden" id="veiculoId">
 
-        <div class="painel-form-group">
-          <label class="painel-form-label" for="veiculoMarca">Marca</label>
-          <input type="text" class="painel-form-control" id="veiculoMarca" placeholder="Ex.: Chevrolet" maxlength="100">
+        <div class="form-group">
+          <label class="form-label" for="veiculoMarca">Marca</label>
+          <input type="text" class="form-control" id="veiculoMarca" placeholder="Ex.: Chevrolet" maxlength="100">
         </div>
-        <div class="painel-form-group">
-          <label class="painel-form-label" for="veiculoModelo">Modelo</label>
-          <input type="text" class="painel-form-control" id="veiculoModelo" placeholder="Ex.: Onix 1.0 Turbo" maxlength="100">
+        <div class="form-group">
+          <label class="form-label" for="veiculoModelo">Modelo</label>
+          <input type="text" class="form-control" id="veiculoModelo" placeholder="Ex.: Onix 1.0 Turbo" maxlength="100">
         </div>
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="painel-form-group">
-              <label class="painel-form-label" for="veiculoAno">Ano</label>
-              <input type="text" class="painel-form-control" id="veiculoAno" placeholder="2020" maxlength="9">
-            </div>
+        <div class="form-group-pair">
+          <div class="form-group">
+            <label class="form-label" for="veiculoAno">Ano</label>
+            <input type="text" class="form-control" id="veiculoAno" placeholder="2020" maxlength="9">
           </div>
-          <div class="col-6">
-            <div class="painel-form-group">
-              <label class="painel-form-label" for="veiculoCor">Cor</label>
-              <input type="text" class="painel-form-control" id="veiculoCor" placeholder="Ex.: Prata" maxlength="50">
-            </div>
+          <div class="form-group">
+            <label class="form-label" for="veiculoCor">Cor</label>
+            <input type="text" class="form-control" id="veiculoCor" placeholder="Ex.: Prata" maxlength="50">
           </div>
         </div>
-        <div class="painel-form-group">
-          <label class="painel-form-label" for="veiculoPlaca">Placa</label>
-          <input type="text" class="painel-form-control" id="veiculoPlaca" placeholder="ABC-1D23" maxlength="8" style="text-transform:uppercase">
+        <div class="form-group">
+          <label class="form-label" for="veiculoPlaca">Placa</label>
+          <input type="text" class="form-control" id="veiculoPlaca" placeholder="ABC-1D23" maxlength="8" style="text-transform:uppercase">
         </div>
       </div>
       <div class="painel-modal-footer">
-        <button type="button" class="btn-outline-dark" data-close-modal="modalVeiculo">Cancelar</button>
-        <button type="button" class="btn-primary-hero" id="btnSalvarVeiculo">Salvar</button>
+        <button type="button" class="btn-outline" data-close-modal="modalVeiculo">Cancelar</button>
+        <button type="button" class="btn-primary" id="btnSalvarVeiculo">Salvar</button>
       </div>
     </div>
   </div>
@@ -188,8 +225,8 @@
         <p>Tem certeza que deseja remover este veículo da sua conta?</p>
       </div>
       <div class="painel-modal-footer">
-        <button type="button" class="btn-outline-dark" data-close-modal="modalExcluir">Cancelar</button>
-        <button type="button" class="btn-primary-hero" id="btnConfirmarExcluir">Remover</button>
+        <button type="button" class="btn-outline" data-close-modal="modalExcluir">Cancelar</button>
+        <button type="button" class="btn-primary" id="btnConfirmarExcluir">Remover</button>
       </div>
     </div>
   </div>
