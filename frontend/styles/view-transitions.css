@@ -1,0 +1,73 @@
+@view-transition {
+  navigation: auto;
+}
+
+@keyframes slide-out-left {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: brightness(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-48px) scale(0.98);
+    filter: brightness(0.6);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px) scale(0.98);
+    filter: brightness(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes red-flash {
+  0%   { opacity: 0; transform: scaleX(0); transform-origin: left; }
+  35%  { opacity: 1; transform: scaleX(1); transform-origin: left; }
+  65%  { opacity: 1; transform: scaleX(1); transform-origin: right; }
+  100% { opacity: 0; transform: scaleX(0); transform-origin: right; }
+}
+
+::view-transition-old(root) {
+  animation: slide-out-left 0.38s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: slide-in-right 0.38s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+::view-transition-image-pair(root) {
+  isolation: isolate;
+}
+
+::view-transition-group(root)::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ac2a2a, #D32F2F, #ac2a2a);
+  box-shadow: 0 0 12px rgba(212, 43, 43, 0.7);
+  animation: red-flash 0.38s cubic-bezier(0.4, 0, 0.2, 1) both;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+
+  ::view-transition-group(root)::after {
+    display: none;
+  }
+}
