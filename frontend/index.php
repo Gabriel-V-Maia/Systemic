@@ -180,7 +180,8 @@ $router->post('/cadastro/criar', function () {
 });
 
 $router->get('/logs', function () {
-    serve_page('/pages/logs/', __DIR__ . '/pages/logs/logs.html');
+    AccessControl::exigir_permissao('logs.visualizar');
+    serve_protected_page('/pages/logs/', __DIR__ . '/pages/logs/logs.html');
 });
 
 // Rotas protegidas
