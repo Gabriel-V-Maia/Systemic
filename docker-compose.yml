@@ -25,6 +25,8 @@ services:
       FG_DB_NAME: flowgate_db
       FG_DB_USER: flowgate
       FG_DB_PASS: flowgate123
+      FLOWGATE_URL: http://localhost:8081
+      FLOWGATE_KEY: automax-dev-key-2026
 
   db:
     image: mariadb:10.11
