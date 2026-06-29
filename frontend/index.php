@@ -421,7 +421,7 @@ $router->delete('/api/perfil/foto', function () {
     ClienteController::foto_remover();
 });
 
-// Servir avatares salvos em disco
+// Servir avatares salvos em disco legal
 
 $router->get('/uploads/avatars/:arquivo', function (array $params) {
     $nome = basename($params['arquivo'] ?? '');
