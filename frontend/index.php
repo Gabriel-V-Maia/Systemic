@@ -15,6 +15,7 @@ use Automax\Controllers\FuncionariosController;
 use Automax\Controllers\ClienteController;
 use Automax\Controllers\AgendamentoController;
 use Automax\Controllers\LogsController;
+use Automax\Controllers\OrdemController;
 use Automax\Controllers\ProdutoNotFoundException;
 use Automax\Config\DatabaseException;
 
@@ -247,6 +248,38 @@ $router->get('/painel', function () {
 $router->get('/pedir', function () {
     AccessControl::exigir_cliente();
     serve_protected_page('/pages/pedir/', __DIR__ . '/pages/pedir/pedir.html');
+});
+
+// API de ordens de serviço
+
+$router->get('/api/ordens', function () {
+    OrdemController::listar();
+});
+
+$router->post('/api/ordens', function () {
+    OrdemController::criar();
+});
+
+$router->patch('/api/ordens/:id', function (array $params) {
+    OrdemController::atualizar($params);
+});
+
+$router->patch('/api/ordens/:id/fechar', function (array $params) {
+    OrdemController::fechar($params);
+});
+
+$router->delete('/api/ordens/:id', function (array $params) {
+    OrdemController::deletar($params);
+});
+
+$router->get('/api/ordem/suporte', function () {
+    include __DIR__ . '/api/ordem_suporte.php';
+});
+
+// API de catálogo da Flowgate (proxy)
+
+$router->get('/api/flowgate/pecas', function () {
+    include __DIR__ . '/api/flowgate_pecas.php';
 });
 
 // API de produtos
