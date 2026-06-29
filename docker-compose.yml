@@ -40,6 +40,7 @@ services:
       - ./backend/Banco_de_Dados/seed_funcionarios.sql:/docker-entrypoint-initdb.d/02_seed.sql
       - ./backend/Banco_de_Dados/flowgate_init.sql:/docker-entrypoint-initdb.d/03_flowgate_user.sql
       - ./flowgate/docs/flowgate_db.sql:/docker-entrypoint-initdb.d/04_flowgate_schema.sql
+      - ./backend/Banco_de_Dados/seed_cliente_teste.sql:/docker-entrypoint-initdb.d/05_seed_cliente_teste.sql
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
