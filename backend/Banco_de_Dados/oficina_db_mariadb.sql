@@ -21,6 +21,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE IF NOT EXISTS clientes (
     id_cliente    INT            NOT NULL AUTO_INCREMENT,
     nome_cliente  VARCHAR(255)   NOT NULL,
+    foto_perfil VARCHAR(255) DEFAULT NULL, 
     CPF           VARCHAR(14)    NOT NULL,
     celular       VARCHAR(20)    NOT NULL,
     email         VARCHAR(255)   NOT NULL,
