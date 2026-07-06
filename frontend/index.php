@@ -329,6 +329,10 @@ $router->get('/api/estoque/:id', function (array $params) {
     EstoqueController::buscar($params);
 });
 
+$router->post('/api/estoque/imagem', function () {
+    EstoqueController::imagem_upload();
+});
+
 $router->post('/api/estoque', function () {
     EstoqueController::criar();
 });
@@ -424,6 +428,30 @@ $router->post('/api/perfil/foto', function () {
 $router->delete('/api/perfil/foto', function () {
     AccessControl::exigir_cliente();
     ClienteController::foto_remover();
+});
+
+// Servir imagens de produtos salvas em disco
+
+$router->get('/uploads/produtos/:arquivo', function (array $params) {
+    $nome = basename($params['arquivo'] ?? '');
+
+    if (!preg_match('/^prod_[a-f0-9._]+\.webp$/', $nome)) {
+        http_response_code(404);
+        exit;
+    }
+
+    $caminho = '/var/www/html/automax/uploads/produtos/' . $nome;
+
+    if (!file_exists($caminho)) {
+        http_response_code(404);
+        exit;
+    }
+
+    header('Content-Type: image/webp');
+    header('Cache-Control: public, max-age=3600');
+    header('X-Content-Type-Options: nosniff');
+    readfile($caminho);
+    exit;
 });
 
 // Servir avatares salvos em disco legal

@@ -251,8 +251,19 @@
             <input class="form-control" type="number" id="inputStock" min="0" step="1" placeholder="0" required>
           </div>
           <div class="col-12">
-            <label class="form-label" for="inputImagem">URL da Imagem *</label>
-            <input class="form-control" type="url" id="inputImagem" placeholder="https://..." required>
+            <label class="form-label" for="inputImagem">Imagem do Produto *</label>
+            <div class="d-flex align-items-start gap-3">
+              <img id="previewImagem" src="" alt=""
+                   style="width:64px;height:64px;object-fit:contain;border-radius:6px;background:rgba(0,0,0,.3);padding:4px;display:none;">
+              <div class="flex-grow-1">
+                <input class="form-control" type="file" id="inputImagem"
+                       accept="image/jpeg,image/png,image/webp,image/gif">
+                <div style="font-size:11px;color:var(--text-dim);margin-top:4px">
+                  JPEG, PNG, WEBP ou GIF · Máx. 5 MB
+                </div>
+              </div>
+            </div>
+            <input type="hidden" id="imagemUrl">
           </div>
           <div class="col-12">
             <label class="form-label" for="inputDetalhes">Detalhes *</label>

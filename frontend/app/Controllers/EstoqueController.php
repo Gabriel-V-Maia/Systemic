@@ -10,6 +10,11 @@ use Automax\Auth\AccessControl;
 
 class EstoqueController
 {
+    private const IMAGEM_DIR      = '/var/www/html/automax/uploads/produtos/';
+    private const IMAGEM_URL      = '/uploads/produtos/';
+    private const IMAGEM_MAX_BYTES = 5 * 1024 * 1024;
+    private const TIPOS_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
     public static function listar(): void
     {
         AccessControl::exigir_permissao('estoque.visualizar');
@@ -69,6 +74,60 @@ class EstoqueController
             error_log('[EstoqueController] listar: ' . $e->getMessage());
             self::json(503, ['erro' => 'Serviço indisponível.']);
         }
+    }
+
+    public static function imagem_upload(): void
+    {
+        AccessControl::exigir_permissao('estoque.editar');
+        self::validar_csrf();
+
+        if (empty($_FILES['imagem'])) {
+            self::json(400, ['erro' => 'Arquivo não recebido.']);
+            return;
+        }
+
+        if ($_FILES['imagem']['error'] !== UPLOAD_ERR_OK) {
+            $status = in_array($_FILES['imagem']['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) ? 413 : 400;
+            $erro   = $status === 413 ? 'Arquivo muito grande. Máximo 5 MB.' : 'Falha no upload.';
+            self::json($status, ['erro' => $erro]);
+            return;
+        }
+
+        if ($_FILES['imagem']['size'] > self::IMAGEM_MAX_BYTES) {
+            self::json(413, ['erro' => 'Arquivo muito grande. Máximo 5 MB.']);
+            return;
+        }
+
+        $tmp  = $_FILES['imagem']['tmp_name'];
+        $mime = mime_content_type($tmp);
+
+        if (!in_array($mime, self::TIPOS_PERMITIDOS, true)) {
+            self::json(415, ['erro' => 'Formato inválido. Use JPEG, PNG, WEBP ou GIF.']);
+            return;
+        }
+
+        $imagem_src = self::carregar_imagem($tmp, $mime);
+        if ($imagem_src === null) {
+            self::json(422, ['erro' => 'Não foi possível processar a imagem.']);
+            return;
+        }
+
+        if (!is_dir(self::IMAGEM_DIR)) {
+            mkdir(self::IMAGEM_DIR, 0755, true);
+        }
+
+        $nome_arquivo = uniqid('prod_', true) . '.webp';
+        $caminho      = self::IMAGEM_DIR . $nome_arquivo;
+
+        if (!imagewebp($imagem_src, $caminho, 85)) {
+            imagedestroy($imagem_src);
+            self::json(500, ['erro' => 'Falha ao salvar a imagem.']);
+            return;
+        }
+
+        imagedestroy($imagem_src);
+
+        self::json(200, ['imagem_url' => self::IMAGEM_URL . $nome_arquivo]);
     }
 
     public static function criar(): void
@@ -272,6 +331,22 @@ class EstoqueController
         }
     }
 
+    private static function carregar_imagem(string $path, string $mime): \GdImage|null
+    {
+        $fn = match ($mime) {
+            'image/jpeg' => 'imagecreatefromjpeg',
+            'image/png'  => 'imagecreatefrompng',
+            'image/webp' => 'imagecreatefromwebp',
+            'image/gif'  => 'imagecreatefromgif',
+            default      => null,
+        };
+
+        if ($fn === null) return null;
+
+        $img = @$fn($path);
+        return $img instanceof \GdImage ? $img : null;
+    }
+
     private static function montar_filtros(string $busca, string $categoria): array
     {
         $condicoes = [];
@@ -320,7 +395,7 @@ class EstoqueController
 
         $imagem = trim($body['imagem'] ?? '');
         if ($imagem === '') {
-            $erros[] = 'URL da imagem é obrigatória.';
+            $erros[] = 'Imagem é obrigatória.';
         }
 
         $detalhes = trim($body['detalhes'] ?? '');
