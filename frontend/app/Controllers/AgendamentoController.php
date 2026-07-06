@@ -10,9 +10,15 @@ use Automax\Config\DatabaseException;
 /**
  * Agendamento de serviços (/pedir).
  *
- * Desde a integração com o painel do cliente, todo agendamento é vinculado
- * à conta autenticada (id_cliente) e, opcionalmente, a um dos veículos
- * cadastrados do cliente (id_veiculo).
+ * A tabela `agendamentos` (oficina_db) não possui vínculo direto por
+ * chave estrangeira com `clientes` ou `veiculos` — apenas campos livres
+ * de contato e do veículo, preenchidos pelo formulário público.
+ *
+ * Para que o cliente autenticado consiga localizar depois seus próprios
+ * agendamentos (ver ClienteController::listar_agendamentos), o e-mail
+ * gravado é sempre o e-mail da conta autenticada (da sessão), nunca o
+ * valor digitado no formulário — isso evita que alguém veja agendamentos
+ * de outra pessoa só por informar o e-mail dela.
  */
 class AgendamentoController
 {
@@ -22,8 +28,8 @@ class AgendamentoController
     {
         self::validar_csrf();
 
-        $id_cliente = (int) ($_SESSION['cliente_id'] ?? 0);
-        $body       = self::ler_body();
+        $email_conta = trim((string) ($_SESSION['cliente_email'] ?? ''));
+        $body        = self::ler_body();
 
         if ($body === null) {
             self::json(400, ['ok' => false, 'erro' => 'Corpo inválido.']);
@@ -39,21 +45,17 @@ class AgendamentoController
         try {
             $db = Database::get_instance();
 
-            $id_veiculo = self::resolver_veiculo($db, $id_cliente, $body);
-
             $db->execute(
                 'INSERT INTO agendamentos
-                    (id_cliente, id_veiculo, nome, telefone, email, placa, marca, modelo, ano,
+                    (nome, telefone, email, placa, marca, modelo, ano,
                      combustivel, km, servico, sintomas, descricao, data_preferida, turno)
                  VALUES
-                    (:id_cliente, :id_veiculo, :nome, :telefone, :email, :placa, :marca, :modelo, :ano,
+                    (:nome, :telefone, :email, :placa, :marca, :modelo, :ano,
                      :combustivel, :km, :servico, :sintomas, :descricao, :data_preferida, :turno)',
                 [
-                    ':id_cliente'     => $id_cliente,
-                    ':id_veiculo'     => $id_veiculo,
                     ':nome'           => trim($body['nome']),
                     ':telefone'       => trim($body['telefone']),
-                    ':email'          => trim($body['email'] ?? '') ?: null,
+                    ':email'          => $email_conta ?: null,
                     ':placa'          => strtoupper(trim($body['placa'] ?? '')) ?: null,
                     ':marca'          => trim($body['marca']),
                     ':modelo'         => trim($body['modelo']),
@@ -99,11 +101,6 @@ class AgendamentoController
             $erros[] = 'Turno inválido.';
         }
 
-        $email = $body['email'] ?? '';
-        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $erros[] = 'E-mail inválido.';
-        }
-
         return $erros;
     }
 
@@ -111,26 +108,6 @@ class AgendamentoController
     {
         $partes = \DateTime::createFromFormat('Y-m-d', $data);
         return $partes !== false && $partes->format('Y-m-d') === $data;
-    }
-
-    /**
-     * Se o agendamento informar a placa de um veículo já cadastrado pelo
-     * cliente autenticado, vincula o agendamento a esse veículo (id_veiculo).
-     * Caso contrário (placa nova ou não informada), retorna null.
-     */
-    private static function resolver_veiculo(Database $db, int $id_cliente, array $body): ?int
-    {
-        $placa = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $body['placa'] ?? ''));
-        if ($placa === '' || $id_cliente <= 0) {
-            return null;
-        }
-
-        $veiculo = $db->query_one(
-            'SELECT id_veiculo FROM veiculos WHERE placa = :placa AND id_cliente = :id_cliente LIMIT 1',
-            [':placa' => $placa, ':id_cliente' => $id_cliente]
-        );
-
-        return $veiculo !== null ? (int) $veiculo['id_veiculo'] : null;
     }
 
     private static function ou_null_int(mixed $valor): ?int
