@@ -1,214 +1,229 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produtos — AUTO MAX</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <link rel="stylesheet" href="/styles/produto.css">
-    <link rel="stylesheet" href="../../styles/view-transitions.css">
-    <style>
-        .filtros-bar {
-            background-color: var(--carbon-mid);
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 12px 0;
-            position: sticky;
-            top: 56px;
-            z-index: 100;
-        }
-
-        .btn-filtro {
-            background: transparent;
-            border: 1px solid var(--border-subtle);
-            color: var(--text-dim);
-            border-radius: 50px;
-            padding: 6px 20px;
-            font-size: 0.85rem;
-            font-family: var(--font-display);
-            letter-spacing: 0.04em;
-            transition: var(--transition);
-        }
-
-        .btn-filtro:hover,
-        .btn-filtro.ativo {
-            background-color: var(--red-vivid);
-            border-color: var(--red-vivid);
-            color: #fff;
-        }
-
-        .card-produto {
-            background-color: var(--carbon-light);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            transition: var(--transition);
-            height: 100%;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-produto:hover {
-            border-color: var(--border-accent);
-            box-shadow: var(--shadow-red);
-            transform: translateY(-4px);
-        }
-
-        .card-produto-img {
-            height: 200px;
-            object-fit: contain;
-            background-color: var(--carbon-mid);
-            padding: 16px;
-            width: 100%;
-        }
-
-        .card-produto-body {
-            padding: 16px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .card-produto-nome {
-            color: var(--off-white);
-            font-family: var(--font-display);
-            font-size: 1rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .card-produto-cat {
-            color: var(--text-dim);
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-
-        .card-produto-preco {
-            color: var(--red-vivid);
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-top: auto;
-        }
-
-        .badge-sem-estoque {
-            background-color: var(--steel);
-            color: #fff;
-            font-size: 0.7rem;
-            padding: 3px 8px;
-            border-radius: var(--radius-sm);
-            font-family: var(--font-display);
-            letter-spacing: 0.04em;
-        }
-
-        #estado-loading,
-        #estado-vazio,
-        #estado-erro {
-            min-height: 40vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .paginacao .btn {
-            background: transparent;
-            border: 1px solid var(--border-subtle);
-            color: var(--text-dim);
-            border-radius: var(--radius-sm);
-            padding: 6px 14px;
-            transition: var(--transition);
-        }
-
-        .paginacao .btn:hover:not(:disabled),
-        .paginacao .btn.ativo {
-            background-color: var(--red-vivid);
-            border-color: var(--red-vivid);
-            color: #fff;
-        }
-
-        .paginacao .btn:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-        }
-
-        .total-info {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Automax — Catálogo de peças, fluidos e itens elétricos em Joinville/SC. Encontre o que seu veículo precisa.">
+  <meta name="keywords" content="autopeças, peças, fluidos, elétrica automotiva, catálogo, Joinville, Automax">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Automax Automotivas">
+  <meta property="og:title" content="Produtos — Automax Oficina Mecânica">
+  <meta property="og:description" content="Catálogo de peças, fluidos e itens elétricos em Joinville/SC.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="theme-color" content="#0D0E10">
+  <title>Produtos — Automax | Joinville/SC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link rel="stylesheet" href="../../styles/produtos.css">
+  <link rel="stylesheet" href="../../styles/view-transitions.css">
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold fs-4" href="/">AUTO<span class="text-danger">MAX</span></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/">Início</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/produtos">Produtos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/ordem-servico">Ordens</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
-    <div class="filtros-bar">
-        <div class="container d-flex gap-2 flex-wrap">
-            <button class="btn-filtro ativo" data-categoria="todos">Todos</button>
-            <button class="btn-filtro" data-categoria="pecas">Peças</button>
-            <button class="btn-filtro" data-categoria="fluidos">Fluidos</button>
-            <button class="btn-filtro" data-categoria="eletrico">Elétrico</button>
+  <nav class="site-navbar" id="mainNav" aria-label="Navegação principal">
+    <div class="container-xl">
+      <div class="navbar-inner">
+        <a class="navbar-brand-link" href="/" aria-label="Automax — Página inicial">
+          <span class="brand-auto">AUTO</span><span class="brand-max">MAX</span>
+        </a>
+
+        <ul class="navbar-nav-list d-none d-lg-flex" role="list">
+          <li><a href="/"          class="nav-link">Início</a></li>
+          <li><a href="/servicos"  class="nav-link">Serviços</a></li>
+          <li><a href="/produtos"  class="nav-link active" aria-current="page">Produtos</a></li>
+          <li><a href="/#sobre"    class="nav-link">Sobre</a></li>
+          <li><a href="https://wa.link/2ub6xt" class="nav-link" target="_blank" rel="noopener noreferrer">Contato</a></li>
+        </ul>
+
+        <div class="navbar-actions d-none d-md-flex">
+          <a href="/auth/login" class="btn-ghost-nav">Entrar</a>
+          <a href="/pedir"      class="btn-red-nav">Agendar</a>
         </div>
+
+        <button class="mobile-toggle d-lg-none" id="mobileToggle"
+                aria-expanded="false" aria-controls="mobileMenu" aria-label="Abrir menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
 
-    <div class="container py-5 mt-4">
+    <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+      <div class="container-xl">
+        <ul class="mobile-nav-list" role="list">
+          <li><a href="/"         class="mobile-nav-link">Início</a></li>
+          <li><a href="/servicos" class="mobile-nav-link">Serviços</a></li>
+          <li><a href="/produtos" class="mobile-nav-link">Produtos</a></li>
+          <li><a href="/#sobre"   class="mobile-nav-link">Sobre</a></li>
+          <li><a href="https://wa.link/2ub6xt" class="mobile-nav-link" target="_blank" rel="noopener noreferrer">Contato</a></li>
+        </ul>
+        <div class="mobile-actions">
+          <a href="/auth/login" class="btn-ghost-nav w-100 text-center">Entrar</a>
+          <a href="/pedir"      class="btn-red-nav w-100 text-center">Agendar</a>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 style="font-family: var(--font-display); color: var(--off-white); font-size: 2rem; letter-spacing: 0.04em;">
-                CATÁLOGO
-            </h2>
-            <span id="total-info" class="total-info"></span>
+  <main id="main-content">
+
+    <section class="catalog-hero" aria-labelledby="hero-heading">
+      <div class="container-xl">
+        <div class="catalog-hero-eyebrow" aria-hidden="true">
+          <span class="eyebrow-dot"></span>
+          Autopeças &amp; acessórios
+        </div>
+        <h1 class="catalog-hero-title" id="hero-heading">
+          Peças para<br><span class="text-red">seu veículo</span>
+        </h1>
+        <p class="catalog-hero-sub">
+          Peças, fluidos e itens elétricos com procedência garantida. Filtre por categoria e encontre
+          exatamente o que você precisa.
+        </p>
+      </div>
+    </section>
+
+    <div class="filtros-bar">
+      <div class="container-xl">
+        <div class="filtros-list" role="list" aria-label="Filtros de categoria">
+          <button class="btn-filtro ativo" data-categoria="todos">Todos</button>
+          <button class="btn-filtro" data-categoria="pecas">Peças</button>
+          <button class="btn-filtro" data-categoria="fluidos">Fluidos</button>
+          <button class="btn-filtro" data-categoria="eletrico">Elétrico</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="catalog-section">
+      <div class="container-xl">
+
+        <div class="catalog-heading">
+          <h2 class="catalog-title">Catálogo</h2>
+          <span id="total-info" class="total-info"></span>
         </div>
 
         <div id="estado-loading" class="text-center py-5">
-            <div class="spinner-border text-danger" role="status" style="width:3rem;height:3rem;">
-                <span class="visually-hidden">Carregando...</span>
-            </div>
-            <p class="mt-3" style="color: var(--text-dim);">Carregando produtos...</p>
+          <div class="spinner-border text-danger" role="status" style="width:3rem;height:3rem;">
+            <span class="visually-hidden">Carregando...</span>
+          </div>
+          <p class="mt-3" style="color: var(--text-dim);">Carregando produtos...</p>
         </div>
 
         <div id="estado-erro" class="text-center py-5" hidden>
-            <i class="fas fa-exclamation-circle fa-3x mb-3" style="color: var(--red-vivid);"></i>
-            <h4 style="color: var(--off-white);">Erro ao carregar produtos</h4>
-            <p id="mensagem-erro" style="color: var(--text-dim);"></p>
-            <button class="btn btn-red mt-2" onclick="carregar_pagina(pagina_atual)">
-                <i class="fas fa-rotate-right me-2"></i> Tentar novamente
-            </button>
+          <i class="fas fa-exclamation-circle fa-3x mb-3" style="color: var(--red-vivid);"></i>
+          <h4 style="color: var(--off-white);">Erro ao carregar produtos</h4>
+          <p id="mensagem-erro" style="color: var(--text-dim);"></p>
+          <button class="btn-primary mt-2" onclick="carregar_pagina(pagina_atual)">
+            <i class="fas fa-rotate-right me-2"></i> Tentar novamente
+          </button>
         </div>
 
         <div id="estado-vazio" class="text-center py-5" hidden>
-            <i class="fas fa-box-open fa-3x mb-3" style="color: var(--steel);"></i>
-            <h4 style="color: var(--off-white);">Nenhum produto encontrado</h4>
-            <p style="color: var(--text-dim);">Tente outro filtro de categoria.</p>
+          <i class="fas fa-box-open fa-3x mb-3" style="color: var(--steel);"></i>
+          <h4 style="color: var(--off-white);">Nenhum produto encontrado</h4>
+          <p style="color: var(--text-dim);">Tente outro filtro de categoria.</p>
         </div>
 
         <div id="grid-produtos" class="row g-4" hidden></div>
 
         <div id="paginacao" class="paginacao d-flex justify-content-center align-items-center gap-2 mt-5" hidden></div>
 
-    </div>
+      </div>
+    </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/pages/produtos/produtos.js"></script>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-top">
+      <div class="container-xl">
+        <div class="row g-4">
+          <div class="col-12 col-lg-4">
+            <a class="footer-brand" href="/" aria-label="Automax — ir para página inicial">
+              <span class="brand-auto">AUTO</span><span class="brand-max">MAX</span>
+            </a>
+            <p class="footer-about">Sua oficina e loja de auto peças de confiança em Joinville há mais de alguns meses</p>
+            <div class="footer-socials" role="list" aria-label="Redes sociais da Automax">
+              <a href="https://wa.link/2ub6xt" class="footer-social-btn" role="listitem"
+                 target="_blank" rel="noopener noreferrer" aria-label="WhatsApp da Automax">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                     viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+              </a>
+              <a href="#" class="footer-social-btn" role="listitem"
+                 aria-label="Instagram da Automax" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <h3 class="footer-heading">Navegação</h3>
+            <nav aria-label="Rodapé — links de navegação">
+              <ul class="footer-links" role="list">
+                <li><a href="/"         class="footer-link">Início</a></li>
+                <li><a href="/servicos" class="footer-link">Serviços</a></li>
+                <li><a href="/produtos" class="footer-link">Produtos</a></li>
+                <li><a href="/pedir"    class="footer-link">Agendar</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="col-6 col-md-4 col-lg-2">
+            <h3 class="footer-heading">Conta</h3>
+            <nav aria-label="Rodapé — links de conta">
+              <ul class="footer-links" role="list">
+                <li><a href="/auth/login" class="footer-link">Entrar</a></li>
+                <li><a href="/cadastro"   class="footer-link">Cadastrar</a></li>
+                <li><a href="https://wa.link/2ub6xt" class="footer-link">Ajuda</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="col-12 col-md-4 col-lg-4">
+            <h3 class="footer-heading">Contato &amp; Horários</h3>
+            <address class="footer-address">
+              <p><strong>Tel:</strong> <a href="tel:+554733334444" class="footer-link">(47) 3333-4444</a></p>
+              <p><strong>Email:</strong> <a href="mailto:contato@automax.com.br" class="footer-link">contato@automax.com.br</a></p>
+              <p><strong>Endereço:</strong> Rua das Peças, 123 — Joinville/SC</p>
+              <p><strong>Seg–Sex:</strong> 8h – 18h &nbsp;|&nbsp; <strong>Sáb:</strong> 8h – 12h</p>
+            </address>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container-xl">
+        <div class="footer-bottom-inner">
+          <p class="footer-copy">© 2025 Automax Automotivas. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const nav    = document.getElementById('mainNav');
+    const toggle = document.getElementById('mobileToggle');
+    const menu   = document.getElementById('mobileMenu');
+
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('nav-scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    toggle.addEventListener('click', () => {
+      const open = menu.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.setAttribute('aria-hidden', String(!open));
+    });
+  </script>
+  <script src="/pages/produtos/produtos.js"></script>
   <script src="/navbar-session.js" defer></script>
 </body>
 </html>
