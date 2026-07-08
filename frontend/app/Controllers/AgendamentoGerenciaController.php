@@ -10,7 +10,7 @@ use Automax\Auth\AccessControl;
 
 class AgendamentoGerenciaController
 {
-    private const STATUS_VALIDOS = ['pendente', 'confirmado', 'concluido', 'cancelado'];
+    public const STATUS_VALIDOS = ['pendente', 'confirmado', 'em_atendimento', 'concluido', 'cancelado'];
     private const TURNOS_VALIDOS = ['manha', 'tarde'];
     private const POR_PAGINA     = 15;
 
@@ -127,7 +127,7 @@ class AgendamentoGerenciaController
                         status, criado_em
                    FROM agendamentos
                  {$where_sql}
-                  ORDER BY FIELD(status, 'pendente', 'confirmado', 'concluido', 'cancelado'),
+                  ORDER BY FIELD(status, 'pendente', 'confirmado', 'em_atendimento', 'concluido', 'cancelado'),
                            data_preferida ASC, id DESC
                   LIMIT :limite OFFSET :offset",
                 array_merge($params_base, [':limite' => self::POR_PAGINA, ':offset' => $offset])
