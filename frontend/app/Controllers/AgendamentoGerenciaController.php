@@ -7,6 +7,8 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
+use Automax\Support\Validador;
+use Automax\Support\ErroValidacao;
 
 class AgendamentoGerenciaController
 {
@@ -19,17 +21,13 @@ class AgendamentoGerenciaController
         AccessControl::exigir_permissao('agendamentos.gerenciar');
         self::validar_csrf();
 
-        $body  = self::ler_body();
-        $erros = self::validar_criacao($body);
+        $body = self::ler_body();
 
-        if (!empty($erros)) {
-            self::json(422, ['ok' => false, 'erro' => implode(' ', $erros)]);
+        try {
+            $dados = self::validar_e_normalizar_criacao($body);
+        } catch (ErroValidacao $e) {
+            self::json(422, ['ok' => false, 'erro' => $e->getMessage()]);
             return;
-        }
-
-        $status = trim((string) ($body['status'] ?? '')) ?: 'confirmado';
-        if (!in_array($status, self::STATUS_VALIDOS, true)) {
-            $status = 'confirmado';
         }
 
         try {
@@ -43,21 +41,21 @@ class AgendamentoGerenciaController
                     (:nome, :telefone, :email, :placa, :marca, :modelo, :ano,
                      :combustivel, :km, :servico, :sintomas, :descricao, :data_preferida, :turno, :status)',
                 [
-                    ':nome'           => trim($body['nome']),
-                    ':telefone'       => trim($body['telefone']),
-                    ':email'          => trim((string) ($body['email'] ?? '')) ?: null,
-                    ':placa'          => strtoupper(trim((string) ($body['placa'] ?? ''))) ?: null,
-                    ':marca'          => trim($body['marca']),
-                    ':modelo'         => trim($body['modelo']),
-                    ':ano'            => self::ou_null_int($body['ano'] ?? ''),
-                    ':combustivel'    => trim((string) ($body['combustivel'] ?? '')) ?: null,
-                    ':km'             => self::ou_null_int($body['km'] ?? ''),
-                    ':servico'        => trim($body['servico']),
-                    ':sintomas'       => trim((string) ($body['sintomas']  ?? '')) ?: null,
-                    ':descricao'      => trim((string) ($body['descricao'] ?? '')) ?: null,
-                    ':data_preferida' => $body['data_preferida'],
-                    ':turno'          => trim((string) ($body['turno'] ?? '')) ?: null,
-                    ':status'         => $status,
+                    ':nome'           => $dados['nome'],
+                    ':telefone'       => $dados['telefone'],
+                    ':email'          => $dados['email'],
+                    ':placa'          => $dados['placa'],
+                    ':marca'          => $dados['marca'],
+                    ':modelo'         => $dados['modelo'],
+                    ':ano'            => $dados['ano'],
+                    ':combustivel'    => $dados['combustivel'],
+                    ':km'             => $dados['km'],
+                    ':servico'        => $dados['servico'],
+                    ':sintomas'       => $dados['sintomas'],
+                    ':descricao'      => $dados['descricao'],
+                    ':data_preferida' => $dados['data_preferida'],
+                    ':turno'          => $dados['turno'],
+                    ':status'         => $dados['status'],
                 ]
             );
 
@@ -69,33 +67,57 @@ class AgendamentoGerenciaController
         }
     }
 
-    private static function validar_criacao(array $body): array
+    /**
+     * Valida os campos do agendamento criado manualmente pela recepção/
+     * gerência e devolve os valores já normalizados, prontos para o INSERT.
+     */
+    private static function validar_e_normalizar_criacao(array $body): array
     {
-        $erros = [];
+        $nome     = Validador::texto($body['nome']     ?? null, 'Nome', 3, 255);
+        $telefone = Validador::texto($body['telefone'] ?? null, 'Telefone', 8, 30);
+        $marca    = Validador::texto($body['marca']    ?? null, 'Marca do veículo', 2, 100);
+        $modelo   = Validador::texto($body['modelo']   ?? null, 'Modelo do veículo', 2, 100);
+        $servico  = Validador::texto($body['servico']  ?? null, 'Serviço', 1, 100);
 
-        if (empty(trim($body['nome']     ?? ''))) $erros[] = 'Nome é obrigatório.';
-        if (empty(trim($body['telefone'] ?? ''))) $erros[] = 'Telefone é obrigatório.';
-        if (empty(trim($body['marca']    ?? ''))) $erros[] = 'Marca do veículo é obrigatória.';
-        if (empty(trim($body['modelo']   ?? ''))) $erros[] = 'Modelo do veículo é obrigatório.';
-        if (empty(trim($body['servico']  ?? ''))) $erros[] = 'Serviço é obrigatório.';
+        $email       = Validador::texto($body['email']       ?? null, 'E-mail', 5, 255, false);
+        $placa       = Validador::texto($body['placa']       ?? null, 'Placa', 1, 8, false);
+        $combustivel = Validador::texto($body['combustivel'] ?? null, 'Combustível', 1, 30, false);
+        $sintomas    = Validador::texto($body['sintomas']    ?? null, 'Sintomas', 1, 255, false);
+        $descricao   = Validador::texto($body['descricao']   ?? null, 'Descrição', 1, 1000, false);
 
-        $email = trim((string) ($body['email'] ?? ''));
-        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $erros[] = 'E-mail inválido.';
+        if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new ErroValidacao('E-mail inválido.');
         }
 
-        $data_preferida = $body['data_preferida'] ?? '';
-        $partes = \DateTime::createFromFormat('Y-m-d', (string) $data_preferida);
+        $ano = Validador::inteiro($body['ano'] ?? null, 'Ano do veículo', 1900, 2100, false);
+        $km  = Validador::inteiro($body['km']  ?? null, 'Quilometragem', 0, 2_000_000, false);
+
+        $data_preferida = trim((string) ($body['data_preferida'] ?? ''));
+        $partes = \DateTime::createFromFormat('Y-m-d', $data_preferida);
         if (!$partes || $partes->format('Y-m-d') !== $data_preferida) {
-            $erros[] = 'Data preferida inválida.';
+            throw new ErroValidacao('Data preferida inválida.');
         }
 
-        $turno = trim((string) ($body['turno'] ?? ''));
-        if ($turno !== '' && !in_array($turno, self::TURNOS_VALIDOS, true)) {
-            $erros[] = 'Turno inválido.';
-        }
+        $turno  = Validador::whitelist($body['turno']  ?? '', 'Turno', [...self::TURNOS_VALIDOS, '']);
+        $status = Validador::whitelist($body['status'] ?? 'confirmado', 'Status', self::STATUS_VALIDOS);
 
-        return $erros;
+        return [
+            'nome'           => $nome,
+            'telefone'       => $telefone,
+            'email'          => $email,
+            'placa'          => $placa !== null ? strtoupper($placa) : null,
+            'marca'          => $marca,
+            'modelo'         => $modelo,
+            'ano'            => $ano,
+            'combustivel'    => $combustivel,
+            'km'             => $km,
+            'servico'        => $servico,
+            'sintomas'       => $sintomas,
+            'descricao'      => $descricao,
+            'data_preferida' => $data_preferida,
+            'turno'          => $turno !== '' ? $turno : null,
+            'status'         => $status,
+        ];
     }
 
     public static function listar(): void
@@ -236,11 +258,6 @@ class AgendamentoGerenciaController
 
         $where_sql = $condicoes ? ('WHERE ' . implode(' AND ', $condicoes)) : '';
         return [$where_sql, $params];
-    }
-
-    private static function ou_null_int(mixed $valor): ?int
-    {
-        return $valor !== '' && $valor !== null ? (int) $valor : null;
     }
 
     private static function validar_int_positivo(mixed $valor): ?int
