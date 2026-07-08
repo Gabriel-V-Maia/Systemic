@@ -7,10 +7,13 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
-use Automax\Support\Logger;
+use Automax\Support\Validador;
+use Automax\Support\ErroValidacao;
 
 class OrdemController
 {
+    private const TIPOS_ORDEM_VALIDOS = ['revisao', 'pecas', 'emergencia', 'vip'];
+
     // ─── Helpers ─────────────────────────────────────────────
 
     private static function json(int $status, mixed $data): void
@@ -80,6 +83,48 @@ class OrdemController
         }
     }
 
+    /**
+     * Valida e normaliza os campos comuns a criar() e atualizar().
+     * Lança ErroValidacao com mensagem pronta para o cliente quando
+     * algum campo estiver fora dos limites (tamanho, faixa ou whitelist).
+     *
+     * @return array{id_funcionario:?int, id_cliente:int, id_veiculo:int,
+     *               tipo_ordem:string, diagnostico:?string, abertura:string,
+     *               prazo:string, mao_de_obra:?float, orcamento:?float}
+     */
+    private static function validar_dados_ordem(array $body): array
+    {
+        return [
+            'id_funcionario' => Validador::inteiro($body['id_funcionario'] ?? null, 'Funcionário', 1, PHP_INT_MAX, false),
+            'id_cliente'     => Validador::inteiro($body['id_cliente']     ?? null, 'Cliente', 1),
+            'id_veiculo'     => Validador::inteiro($body['id_veiculo']     ?? null, 'Veículo', 1),
+            'tipo_ordem'     => Validador::whitelist($body['tipo_ordem']   ?? null, 'Tipo de ordem', self::TIPOS_ORDEM_VALIDOS),
+            'diagnostico'    => Validador::texto($body['diagnostico']      ?? null, 'Diagnóstico', 1, 2000, false),
+            'abertura'       => Validador::texto($body['abertura']         ?? null, 'Data de abertura', 1, 10),
+            'prazo'          => Validador::texto($body['prazo']            ?? null, 'Prazo', 1, 10),
+            'mao_de_obra'    => Validador::decimal($body['mao_de_obra']    ?? null, 'Mão de obra', 0, 99_999_999.99, false),
+            'orcamento'      => Validador::decimal($body['orcamento']      ?? null, 'Orçamento', 0, 99_999_999.99, false),
+        ];
+    }
+
+    private static function id_funcionario_sessao(): ?int
+    {
+        $id = $_SESSION['funcionario_id'] ?? null;
+        return $id !== null ? (int)$id : null;
+    }
+
+    private static function registrar_log(Database $db, ?int $id_funcionario, string $detalhe): void
+    {
+        try {
+            $db->execute(
+                'INSERT INTO logs (id_funcionario, detalhe) VALUES (:id_funcionario, :detalhe)',
+                [':id_funcionario' => $id_funcionario, ':detalhe' => $detalhe]
+            );
+        } catch (\Throwable $e) {
+            error_log('[OrdemController] registrar_log: ' . $e->getMessage());
+        }
+    }
+
     // ─── GET /api/ordens ─────────────────────────────────────
 
     public static function listar(): void
@@ -136,16 +181,10 @@ class OrdemController
         $body = self::ler_body();
         if ($body === null) { self::json(400, ['erro' => 'Corpo inválido.']); return; }
 
-        $id_funcionario = isset($body['id_funcionario']) && $body['id_funcionario'] !== ''
-            ? (int)$body['id_funcionario'] : null;
-        $id_cliente = (int)($body['id_cliente'] ?? 0);
-        $id_veiculo = (int)($body['id_veiculo'] ?? 0);
-        $tipo_ordem = trim((string)($body['tipo_ordem'] ?? ''));
-        $abertura   = trim((string)($body['abertura']   ?? ''));
-        $prazo      = trim((string)($body['prazo']      ?? ''));
-
-        if (!$id_cliente || !$id_veiculo || !$tipo_ordem || !$abertura || !$prazo) {
-            self::json(422, ['erro' => 'Campos obrigatórios ausentes.']); return;
+        try {
+            $dados = self::validar_dados_ordem($body);
+        } catch (ErroValidacao $e) {
+            self::json(422, ['erro' => $e->getMessage()]); return;
         }
 
         $db = null;
@@ -163,17 +202,15 @@ class OrdemController
                      :diagnostico, :abertura, :prazo, NULL, NULL,
                      :mao_de_obra, :orcamento, 'aberta')",
                 [
-                    ':id_funcionario' => $id_funcionario,
-                    ':id_cliente'     => $id_cliente,
-                    ':id_veiculo'     => $id_veiculo,
-                    ':tipo_ordem'     => $tipo_ordem,
-                    ':diagnostico'    => trim((string)($body['diagnostico'] ?? '')) ?: null,
-                    ':abertura'       => $abertura,
-                    ':prazo'          => $prazo,
-                    ':mao_de_obra'    => isset($body['mao_de_obra']) && $body['mao_de_obra'] !== ''
-                                            ? (float)$body['mao_de_obra'] : null,
-                    ':orcamento'      => isset($body['orcamento']) && $body['orcamento'] !== ''
-                                            ? (float)$body['orcamento'] : null,
+                    ':id_funcionario' => $dados['id_funcionario'],
+                    ':id_cliente'     => $dados['id_cliente'],
+                    ':id_veiculo'     => $dados['id_veiculo'],
+                    ':tipo_ordem'     => $dados['tipo_ordem'],
+                    ':diagnostico'    => $dados['diagnostico'],
+                    ':abertura'       => $dados['abertura'],
+                    ':prazo'          => $dados['prazo'],
+                    ':mao_de_obra'    => $dados['mao_de_obra'],
+                    ':orcamento'      => $dados['orcamento'],
                 ]
             );
 
@@ -181,8 +218,8 @@ class OrdemController
                 self::salvar_pecas($db, $id_ordem, $body['pecas']);
             }
 
-            $id_func = Logger::funcionario_atual();
-            Logger::registrar("OS #{$id_ordem} criada — tipo: {$tipo_ordem} | cliente: {$id_cliente}", $id_func);
+            $id_func = self::id_funcionario_sessao();
+            self::registrar_log($db, $id_func, "OS #{$id_ordem} criada — tipo: {$dados['tipo_ordem']} | cliente: {$dados['id_cliente']}");
 
             $db->commit();
             self::json(201, ['ok' => true, 'id_ordem' => $id_ordem]);
@@ -207,16 +244,12 @@ class OrdemController
         $body = self::ler_body();
         if ($body === null) { self::json(400, ['erro' => 'Corpo inválido.']); return; }
 
-        $id_funcionario = isset($body['id_funcionario']) && $body['id_funcionario'] !== ''
-            ? (int)$body['id_funcionario'] : null;
-        $id_cliente = (int)($body['id_cliente'] ?? 0);
-        $id_veiculo = (int)($body['id_veiculo'] ?? 0);
-        $tipo_ordem = trim((string)($body['tipo_ordem'] ?? ''));
-        $abertura   = trim((string)($body['abertura']   ?? ''));
-        $prazo      = trim((string)($body['prazo']      ?? ''));
-
-        if (!$id_cliente || !$id_veiculo || !$tipo_ordem || !$abertura || !$prazo) {
-            self::json(422, ['erro' => 'Campos obrigatórios ausentes.']); return;
+        try {
+            $dados           = self::validar_dados_ordem($body);
+            $fechamento      = Validador::texto($body['fechamento']      ?? null, 'Fechamento', 1, 10, false);
+            $conclusao_ordem = Validador::texto($body['conclusao_ordem'] ?? null, 'Conclusão', 1, 2000, false);
+        } catch (ErroValidacao $e) {
+            self::json(422, ['erro' => $e->getMessage()]); return;
         }
 
         $db = null;
@@ -239,19 +272,17 @@ class OrdemController
                     orcamento       = :orcamento
                   WHERE id_ordem = :id_ordem',
                 [
-                    ':id_funcionario'  => $id_funcionario,
-                    ':id_cliente'      => $id_cliente,
-                    ':id_veiculo'      => $id_veiculo,
-                    ':tipo_ordem'      => $tipo_ordem,
-                    ':diagnostico'     => trim((string)($body['diagnostico']     ?? '')) ?: null,
-                    ':abertura'        => $abertura,
-                    ':prazo'           => $prazo,
-                    ':fechamento'      => trim((string)($body['fechamento']      ?? '')) ?: null,
-                    ':conclusao_ordem' => trim((string)($body['conclusao_ordem'] ?? '')) ?: null,
-                    ':mao_de_obra'     => isset($body['mao_de_obra']) && $body['mao_de_obra'] !== ''
-                                             ? (float)$body['mao_de_obra'] : null,
-                    ':orcamento'       => isset($body['orcamento']) && $body['orcamento'] !== ''
-                                             ? (float)$body['orcamento'] : null,
+                    ':id_funcionario'  => $dados['id_funcionario'],
+                    ':id_cliente'      => $dados['id_cliente'],
+                    ':id_veiculo'      => $dados['id_veiculo'],
+                    ':tipo_ordem'      => $dados['tipo_ordem'],
+                    ':diagnostico'     => $dados['diagnostico'],
+                    ':abertura'        => $dados['abertura'],
+                    ':prazo'           => $dados['prazo'],
+                    ':fechamento'      => $fechamento,
+                    ':conclusao_ordem' => $conclusao_ordem,
+                    ':mao_de_obra'     => $dados['mao_de_obra'],
+                    ':orcamento'       => $dados['orcamento'],
                     ':id_ordem'        => $id_ordem,
                 ]
             );
@@ -291,10 +322,14 @@ class OrdemController
         $body = self::ler_body();
         if ($body === null) { self::json(400, ['erro' => 'Corpo inválido.']); return; }
 
-        $fechamento      = trim((string)($body['fechamento']      ?? '')) ?: date('Y-m-d');
-        $conclusao_ordem = trim((string)($body['conclusao_ordem'] ?? '')) ?: null;
-        $mao_de_obra     = (float)($body['mao_de_obra'] ?? 0);
-        $orcamento       = (float)($body['orcamento']   ?? 0);
+        try {
+            $fechamento      = Validador::texto($body['fechamento']      ?? null, 'Fechamento', 1, 10, false) ?? date('Y-m-d');
+            $conclusao_ordem = Validador::texto($body['conclusao_ordem'] ?? null, 'Conclusão', 1, 2000, false);
+            $mao_de_obra     = Validador::decimal($body['mao_de_obra']   ?? 0, 'Mão de obra', 0, 99_999_999.99);
+            $orcamento       = Validador::decimal($body['orcamento']     ?? 0, 'Orçamento', 0, 99_999_999.99);
+        } catch (ErroValidacao $e) {
+            self::json(422, ['erro' => $e->getMessage()]); return;
+        }
 
         $db = null;
         try {
