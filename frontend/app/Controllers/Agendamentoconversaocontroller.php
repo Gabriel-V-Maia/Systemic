@@ -7,6 +7,8 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
+use Automax\Support\Validador;
+use Automax\Support\ErroValidacao;
 
 /**
  * Converte um agendamento (pedido feito pelo cliente ou pela recepção)
@@ -147,8 +149,9 @@ class AgendamentoConversaoController
      *  3. A placa do agendamento bate com um veículo já cadastrado,
      *     desde que esse veículo pertença ao cliente já resolvido.
      * Não encontrando nada, devolve id_veiculo nulo (sem erro) para o
-     * front pedir os dados que faltam.
+     * front pedir os dados que faltam :).
      */
+      # aparentemente tudo certo
     private static function resolver_veiculo(Database $db, array $agendamento, array $body, int $id_cliente): array
     {
         $id_informado = self::validar_id($body['id_veiculo'] ?? '');
@@ -182,14 +185,18 @@ class AgendamentoConversaoController
 
     private static function criar_veiculo_novo(Database $db, array $dados, int $id_cliente): array
     {
-        $marca  = trim((string) ($dados['marca']  ?? ''));
-        $modelo = trim((string) ($dados['modelo'] ?? ''));
-        $cor    = trim((string) ($dados['cor']    ?? ''));
-        $ano    = trim((string) ($dados['ano']    ?? ''));
-        $placa  = strtoupper(trim((string) ($dados['placa'] ?? '')));
+        try {
+            $marca  = Validador::texto($dados['marca']  ?? null, 'Marca', 2, 100);
+            $modelo = Validador::texto($dados['modelo'] ?? null, 'Modelo', 2, 100);
+            $cor    = Validador::texto($dados['cor']    ?? null, 'Cor', 2, 50);
+            $ano    = Validador::texto($dados['ano']    ?? null, 'Ano', 1, 10, false) ?? '—';
+        } catch (ErroValidacao $e) {
+            return ['id_veiculo' => null, 'erro' => $e->getMessage()];
+        }
 
-        if ($marca === '' || $modelo === '' || $cor === '' || $placa === '') {
-            return ['id_veiculo' => null, 'erro' => 'Marca, modelo, cor e placa são obrigatórios para cadastrar o veículo.'];
+        $placa = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', (string) ($dados['placa'] ?? '')));
+        if (!self::placa_valida($placa)) {
+            return ['id_veiculo' => null, 'erro' => 'Placa inválida. Use o formato ABC-1234 ou ABC1D23.'];
         }
 
         $placa_em_uso = $db->query_one(
@@ -206,7 +213,7 @@ class AgendamentoConversaoController
             [
                 ':marca'      => $marca,
                 ':cor'        => $cor,
-                ':ano'        => $ano !== '' ? $ano : '—',
+                ':ano'        => $ano,
                 ':modelo'     => $modelo,
                 ':placa'      => $placa,
                 ':id_cliente' => $id_cliente,
@@ -214,6 +221,13 @@ class AgendamentoConversaoController
         );
 
         return ['id_veiculo' => $id_veiculo, 'erro' => null];
+    }
+
+    private static function placa_valida(string $placa): bool
+    {
+        $old_format      = '/^[A-Z]{3}\d{4}$/';
+        $mercosul_format = '/^[A-Z]{3}\d[A-Z]\d{2}$/';
+        return (bool) (preg_match($old_format, $placa) || preg_match($mercosul_format, $placa));
     }
 
     private static function criar_ordem_e_encerrar_agendamento(

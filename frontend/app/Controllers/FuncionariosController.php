@@ -99,7 +99,7 @@ class FuncionariosController
             self::responder_erro('Erro ao consultar banco de dados.', 500);
         }
     }
-
+    # aparentemente tudo certo
     public static function criar(): void
     {
         AccessControl::exigir_permissao('funcionarios.gerenciar');
@@ -285,11 +285,12 @@ class FuncionariosController
         string $senha,
         bool   $senha_obrigatoria
     ): ?string {
-        if ($nome === '')  return 'O nome é obrigatório.';
-        if ($email === '') return 'O e-mail é obrigatório.';
-        if ($nivel === '') return 'O nível de acesso é obrigatório.';
+        if ($nome === '')        return 'O nome é obrigatório.';
+        if (mb_strlen($nome) > 255) return 'Nome deve ter no máximo 255 caracteres.';
+        if ($email === '')       return 'O e-mail é obrigatório.';
+        if ($nivel === '')       return 'O nível de acesso é obrigatório.';
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
             return 'Formato de e-mail inválido.';
         }
 
