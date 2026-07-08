@@ -7,6 +7,7 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
+use Automax\Support\Logger;
 
 class AgendamentoGerenciaController
 {
@@ -62,6 +63,8 @@ class AgendamentoGerenciaController
             );
 
             self::json(201, ['ok' => true, 'id' => $id]);
+
+            Logger::registrar("Agendamento #{$id} criado manualmente — cliente: {$body['nome']} | serviço: {$body['servico']}.");
 
         } catch (DatabaseException $e) {
             error_log('[AgendamentosController] criar: ' . $e->getMessage());
@@ -179,6 +182,8 @@ class AgendamentoGerenciaController
                 return;
             }
 
+            Logger::registrar("Agendamento #{$id} teve o status alterado para \"{$status}\".");
+
             self::json(200, ['ok' => true, 'status' => $status]);
 
         } catch (DatabaseException $e) {
@@ -201,12 +206,19 @@ class AgendamentoGerenciaController
         try {
             $db = Database::get_instance();
 
+            $agendamento = $db->query_one(
+                'SELECT nome, servico FROM agendamentos WHERE id = :id LIMIT 1',
+                [':id' => $id]
+            );
+
             $afetados = $db->execute('DELETE FROM agendamentos WHERE id = :id', [':id' => $id]);
 
             if ($afetados === 0) {
                 self::json(404, ['ok' => false, 'erro' => 'Agendamento não encontrado.']);
                 return;
             }
+
+            Logger::registrar("Agendamento #{$id} removido — cliente: {$agendamento['nome']} | serviço: {$agendamento['servico']}.");
 
             self::json(200, ['ok' => true]);
 
@@ -222,11 +234,8 @@ class AgendamentoGerenciaController
         $params    = [];
 
         if ($busca !== '') {
-            $condicoes[] = '(nome LIKE :busca_nome OR placa LIKE :busca_placa OR servico LIKE :busca_servico)';
-            $termo_busca = "%{$busca}%";
-            $params[':busca_nome']    = $termo_busca;
-            $params[':busca_placa']   = $termo_busca;
-            $params[':busca_servico'] = $termo_busca;
+            $condicoes[] = '(nome LIKE :busca OR placa LIKE :busca OR servico LIKE :busca)';
+            $params[':busca'] = "%{$busca}%";
         }
 
         if ($status !== '') {

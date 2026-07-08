@@ -6,6 +6,7 @@ namespace Automax\Controllers;
 
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
+use Automax\Support\Logger;
 
 class AuthController
 {
@@ -35,6 +36,7 @@ class AuthController
 
         if ($funcionario !== null) {
             self::iniciar_sessao_funcionario($funcionario);
+            Logger::registrar('Login realizado no sistema.', (int) $funcionario['id_funcionario']);
             $destino = '/ordem-servico';
         } else {
             self::iniciar_sessao_cliente($cliente);
@@ -53,6 +55,10 @@ class AuthController
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
+        }
+
+        if (($_SESSION['tipo_usuario'] ?? '') === 'funcionario') {
+            Logger::registrar('Logout realizado.', (int) ($_SESSION['funcionario_id'] ?? 0));
         }
 
         $_SESSION = [];

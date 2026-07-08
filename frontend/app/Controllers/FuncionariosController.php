@@ -7,6 +7,7 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
+use Automax\Support\Logger;
 
 class FuncionariosController
 {
@@ -136,6 +137,8 @@ class FuncionariosController
                 [':nome' => $nome, ':email' => $email, ':nivel' => $nivel, ':senha' => $hash]
             );
 
+            Logger::registrar("Funcionário \"{$nome}\" cadastrado — nível: {$nivel}.");
+
             http_response_code(201);
             self::responder_json(['mensagem' => 'Funcionário criado com sucesso.']);
 
@@ -206,6 +209,8 @@ class FuncionariosController
 
             self::responder_json(['mensagem' => 'Funcionário atualizado com sucesso.']);
 
+            Logger::registrar("Funcionário \"{$nome}\" atualizado — nível: {$nivel}.");
+
         } catch (DatabaseException $e) {
             self::responder_erro('Erro ao atualizar no banco de dados.', 500);
         }
@@ -230,7 +235,7 @@ class FuncionariosController
             $db = Database::get_instance();
 
             $existe = $db->query_one(
-                'SELECT id_funcionario FROM funcionarios WHERE id_funcionario = :id LIMIT 1',
+                'SELECT nome_funcionario FROM funcionarios WHERE id_funcionario = :id LIMIT 1',
                 [':id' => $id]
             );
 
@@ -242,6 +247,8 @@ class FuncionariosController
                 'DELETE FROM funcionarios WHERE id_funcionario = :id',
                 [':id' => $id]
             );
+
+            Logger::registrar("Funcionário \"{$existe['nome_funcionario']}\" removido.");
 
             self::responder_json(['mensagem' => 'Funcionário removido com sucesso.']);
 
@@ -256,10 +263,8 @@ class FuncionariosController
         $params    = [];
 
         if ($busca !== '') {
-            $condicoes[] = '(nome_funcionario LIKE :busca_nome OR email LIKE :busca_email)';
-            $termo_busca = '%' . $busca . '%';
-            $params[':busca_nome']  = $termo_busca;
-            $params[':busca_email'] = $termo_busca;
+            $condicoes[] = '(nome_funcionario LIKE :busca OR email LIKE :busca)';
+            $params[':busca'] = '%' . $busca . '%';
         }
 
         if ($nivel !== '') {

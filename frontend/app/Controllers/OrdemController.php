@@ -7,6 +7,7 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
+use Automax\Support\Logger;
 
 class OrdemController
 {
@@ -76,24 +77,6 @@ class OrdemController
                     ':valor'    => $valor,
                 ]
             );
-        }
-    }
-
-    private static function id_funcionario_sessao(): ?int
-    {
-        $id = $_SESSION['funcionario_id'] ?? null;
-        return $id !== null ? (int)$id : null;
-    }
-
-    private static function registrar_log(Database $db, ?int $id_funcionario, string $detalhe): void
-    {
-        try {
-            $db->execute(
-                'INSERT INTO logs (id_funcionario, detalhe) VALUES (:id_funcionario, :detalhe)',
-                [':id_funcionario' => $id_funcionario, ':detalhe' => $detalhe]
-            );
-        } catch (\Throwable $e) {
-            error_log('[OrdemController] registrar_log: ' . $e->getMessage());
         }
     }
 
@@ -198,8 +181,8 @@ class OrdemController
                 self::salvar_pecas($db, $id_ordem, $body['pecas']);
             }
 
-            $id_func = self::id_funcionario_sessao();
-            self::registrar_log($db, $id_func, "OS #{$id_ordem} criada — tipo: {$tipo_ordem} | cliente: {$id_cliente}");
+            $id_func = Logger::funcionario_atual();
+            Logger::registrar("OS #{$id_ordem} criada — tipo: {$tipo_ordem} | cliente: {$id_cliente}", $id_func);
 
             $db->commit();
             self::json(201, ['ok' => true, 'id_ordem' => $id_ordem]);
@@ -280,6 +263,11 @@ class OrdemController
 
             self::salvar_pecas($db, $id_ordem, $body['pecas'] ?? []);
 
+            Logger::registrar(
+                "OS #{$id_ordem} atualizada — tipo: {$tipo_ordem} | cliente: {$id_cliente}",
+                Logger::funcionario_atual()
+            );
+
             $db->commit();
             self::json(200, ['ok' => true]);
 
@@ -340,8 +328,8 @@ class OrdemController
                 self::salvar_pecas($db, $id_ordem, $body['pecas']);
             }
 
-            $id_func = self::id_funcionario_sessao();
-            self::registrar_log($db, $id_func, "OS #{$id_ordem} concluída — fechamento: {$fechamento}");
+            $id_func = Logger::funcionario_atual();
+            Logger::registrar("OS #{$id_ordem} concluída — fechamento: {$fechamento}", $id_func);
 
             $db->commit();
             self::json(200, ['ok' => true]);
@@ -375,8 +363,8 @@ class OrdemController
                 self::json(404, ['erro' => 'OS não encontrada.']); return;
             }
 
-            $id_func = self::id_funcionario_sessao();
-            self::registrar_log($db, $id_func, "OS #{$id_ordem} removida.");
+            $id_func = Logger::funcionario_atual();
+            Logger::registrar("OS #{$id_ordem} removida.", $id_func);
 
             self::json(200, ['ok' => true]);
 

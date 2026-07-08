@@ -7,6 +7,7 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
+use Automax\Support\Logger;
 
 class EstoqueController
 {
@@ -156,6 +157,8 @@ class EstoqueController
                 self::extrair_params($body)
             );
 
+            Logger::registrar("Produto \"{$body['nome']}\" cadastrado no estoque (categoria: {$body['categoria']}).");
+
             self::json(201, ['id_produto' => $id, 'mensagem' => 'Produto criado com sucesso.']);
         } catch (DatabaseException $e) {
             error_log('[EstoqueController] criar: ' . $e->getMessage());
@@ -241,6 +244,8 @@ class EstoqueController
                 return;
             }
 
+            Logger::registrar("Produto \"{$body['nome']}\" atualizado (id #{$id}).");
+
             self::json(200, ['mensagem' => 'Produto atualizado com sucesso.']);
         } catch (DatabaseException $e) {
             error_log('[EstoqueController] atualizar: ' . $e->getMessage());
@@ -275,7 +280,7 @@ class EstoqueController
             $db = Database::get_instance();
 
             $atual = $db->query_one(
-                'SELECT stock FROM produtos WHERE id_produto = :id LIMIT 1',
+                'SELECT nome, stock FROM produtos WHERE id_produto = :id LIMIT 1',
                 [':id' => $id]
             );
 
@@ -294,6 +299,9 @@ class EstoqueController
                 'UPDATE produtos SET stock = :stock WHERE id_produto = :id',
                 [':stock' => $novo_stock, ':id' => $id]
             );
+
+            $sinal = $delta > 0 ? '+' : '';
+            Logger::registrar("Estoque de \"{$atual['nome']}\" ajustado ({$sinal}{$delta}) — novo total: {$novo_stock}.");
 
             self::json(200, ['stock' => $novo_stock, 'mensagem' => 'Estoque ajustado.']);
         } catch (DatabaseException $e) {
@@ -314,7 +322,12 @@ class EstoqueController
         }
 
         try {
-            $db   = Database::get_instance();
+            $db      = Database::get_instance();
+            $produto = $db->query_one(
+                'SELECT nome FROM produtos WHERE id_produto = :id LIMIT 1',
+                [':id' => $id]
+            );
+
             $rows = $db->execute(
                 'DELETE FROM produtos WHERE id_produto = :id',
                 [':id' => $id]
@@ -324,6 +337,8 @@ class EstoqueController
                 self::json(404, ['erro' => 'Produto não encontrado.']);
                 return;
             }
+
+            Logger::registrar("Produto \"{$produto['nome']}\" removido do estoque.");
 
             self::json(200, ['mensagem' => 'Produto removido do estoque.']);
         } catch (DatabaseException $e) {

@@ -7,6 +7,7 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
+use Automax\Support\Logger;
 
 /**
  * Gestão de clientes pelo gerente: listagem, cadastro, edição
@@ -142,6 +143,8 @@ class ClienteGerenciaController
             http_response_code(201);
             self::responder_json(['mensagem' => 'Cliente criado com sucesso.']);
 
+            Logger::registrar("Cliente \"{$nome}\" cadastrado" . ($vip ? ' (VIP).' : '.'));
+
         } catch (DatabaseException $e) {
             error_log('[ClienteGerenciaController] criar: ' . $e->getMessage());
             self::responder_erro('Erro ao salvar no banco de dados.', 500);
@@ -219,6 +222,8 @@ class ClienteGerenciaController
 
             self::responder_json(['mensagem' => 'Cliente atualizado com sucesso.']);
 
+            Logger::registrar("Cliente \"{$nome}\" atualizado.");
+
         } catch (DatabaseException $e) {
             error_log('[ClienteGerenciaController] atualizar: ' . $e->getMessage());
             self::responder_erro('Erro ao atualizar no banco de dados.', 500);
@@ -239,7 +244,7 @@ class ClienteGerenciaController
             $db = Database::get_instance();
 
             $existe = $db->query_one(
-                'SELECT id_cliente FROM clientes WHERE id_cliente = :id LIMIT 1',
+                'SELECT nome_cliente FROM clientes WHERE id_cliente = :id LIMIT 1',
                 [':id' => $id]
             );
 
@@ -259,6 +264,8 @@ class ClienteGerenciaController
             }
 
             $db->execute('DELETE FROM clientes WHERE id_cliente = :id', [':id' => $id]);
+
+            Logger::registrar("Cliente \"{$existe['nome_cliente']}\" removido.");
 
             self::responder_json(['mensagem' => 'Cliente removido com sucesso.']);
 
@@ -295,11 +302,8 @@ class ClienteGerenciaController
         $params    = [];
 
         if ($busca !== '') {
-            $condicoes[] = '(nome_cliente LIKE :busca_nome OR email LIKE :busca_email OR CPF LIKE :busca_cpf)';
-            $termo_busca = '%' . $busca . '%';
-            $params[':busca_nome']  = $termo_busca;
-            $params[':busca_email'] = $termo_busca;
-            $params[':busca_cpf']   = $termo_busca;
+            $condicoes[] = '(nome_cliente LIKE :busca OR email LIKE :busca OR CPF LIKE :busca)';
+            $params[':busca'] = '%' . $busca . '%';
         }
 
         if ($vip === '1' || $vip === '0') {

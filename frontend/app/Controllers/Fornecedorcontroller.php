@@ -7,6 +7,7 @@ namespace Automax\Controllers;
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
+use Automax\Support\Logger;
 
 class FornecedorController
 {
@@ -61,6 +62,8 @@ class FornecedorController
                 [':nome' => $nome, ':cnpj' => $cnpj_formatado]
             );
 
+            Logger::registrar("Fornecedor \"{$nome}\" cadastrado — CNPJ {$cnpj_formatado}.");
+
             self::json(201, ['id_fornecedor' => $id, 'nome_fornecedor' => $nome, 'cnpj' => $cnpj_formatado]);
         } catch (DatabaseException $e) {
             error_log('[FornecedorController] criar: ' . $e->getMessage());
@@ -114,6 +117,8 @@ class FornecedorController
                 return;
             }
 
+            Logger::registrar("Fornecedor \"{$nome}\" atualizado — CNPJ {$cnpj_formatado}.");
+
             self::json(200, ['id_fornecedor' => $id, 'nome_fornecedor' => $nome, 'cnpj' => $cnpj_formatado]);
         } catch (DatabaseException $e) {
             error_log('[FornecedorController] atualizar: ' . $e->getMessage());
@@ -145,6 +150,11 @@ class FornecedorController
                 return;
             }
 
+            $fornecedor = $db->query_one(
+                'SELECT nome_fornecedor FROM fornecedores WHERE id_fornecedor = :id LIMIT 1',
+                [':id' => $id]
+            );
+
             $afetados = $db->execute(
                 'DELETE FROM fornecedores WHERE id_fornecedor = :id',
                 [':id' => $id]
@@ -154,6 +164,8 @@ class FornecedorController
                 self::json(404, ['erro' => 'Fornecedor não encontrado.']);
                 return;
             }
+
+            Logger::registrar("Fornecedor \"{$fornecedor['nome_fornecedor']}\" removido.");
 
             self::json(200, ['ok' => true]);
         } catch (DatabaseException $e) {
