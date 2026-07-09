@@ -298,8 +298,8 @@ async function salvarProduto() {
         const payload = {
             nome:      document.getElementById('inputNome').value.trim(),
             categoria: document.getElementById('inputCategoria').value,
-            preco:     parseFloat(document.getElementById('inputPreco').value),
-            stock:     parseInt(document.getElementById('inputStock').value, 10),
+            preco:     Math.max(0, parseFloat(document.getElementById('inputPreco').value) || 0),
+            stock:     Math.max(0, parseInt(document.getElementById('inputStock').value, 10) || 0),
             imagem:    imagem_url,
             detalhes:  document.getElementById('inputDetalhes').value.trim(),
         };

@@ -82,7 +82,7 @@ function inicializar_eventos_item(container) {
         const botao_qtd = evento.target.closest('.cart-qtd-btn');
         if (botao_qtd) {
             const input = item_el.querySelector('.cart-qtd-input');
-            const atual = parseInt(input.value, 10) || 1;
+            const atual = Math.max(1, parseInt(input.value, 10) || 1);
             const nova = botao_qtd.dataset.acao === 'aumentar' ? atual + 1 : atual - 1;
             Carrinho.atualizarQuantidade(id, nova);
         }

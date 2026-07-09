@@ -378,8 +378,8 @@ async function salvarOS() {
     prazo:          pr,
     fechamento:     document.getElementById('oFech').value || null,
     conclusao_ordem:document.getElementById('oConc').value || null,
-    mao_de_obra:    parseFloat(document.getElementById('oMO').value)  || 0,
-    orcamento:      parseFloat(document.getElementById('oOrc').value) || 0,
+    mao_de_obra:    Math.max(0, parseFloat(document.getElementById('oMO').value)  || 0),
+    orcamento:      Math.max(0, parseFloat(document.getElementById('oOrc').value) || 0),
     pecas:          pecasT,
   };
 
@@ -409,7 +409,7 @@ async function salvarOS() {
 /* FECHAR OS */
 async function fecharOS() {
   if (!editId) return;
-  const mo = parseFloat(document.getElementById('oMO').value) || 0;
+  const mo = Math.max(0, parseFloat(document.getElementById('oMO').value) || 0);
   if (!pecasT.length && !mo) { showVali('⚠️ Não é possível fechar sem peças e mão de obra.'); return; }
   if (!pecasT.length)        { showVali('⚠️ Adicione ao menos uma peça substituída.'); return; }
   if (!mo)                   { showVali('⚠️ Informe o valor da mão de obra.'); return; }
@@ -722,9 +722,7 @@ async function buscarPecasFlowgate(indice, termo) {
     dropdown.innerHTML = data.pecas.map(p => `
       <li role="option"
           style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border-subtle)"
-          data-nome="${esc(p.nome)}"
-          data-preco="${p.preco}"
-          onmousedown="selecionarPecaEl(${indice}, this)"
+          data-nome="${esc(p.nome)}" data-preco="${p.preco}" onmousedown="selecionarPecaEl(${indice}, this)"
           title="${esc(p.sku)} · ${esc(p.fornecedora.nome)}">
         <div style="font-weight:500;color:var(--text-primary)">${esc(p.nome)}</div>
         <div style="color:var(--text-faint);font-size:11px;font-family:var(--font-mono)">
@@ -742,7 +740,7 @@ async function buscarPecasFlowgate(indice, termo) {
 
 function selecionarPecaEl(indice, el) {
   const nome  = el.dataset.nome  || '';
-  const preco = parseFloat(el.dataset.preco) || 0;
+  const preco = Math.max(0, parseFloat(el.dataset.preco) || 0);
   selecionarPeca(indice, nome, preco);
 }
 
@@ -767,7 +765,7 @@ function fecharDropdown(indice) {
 
 function calcOrc() {
   const tp = pecasT.reduce((s, p) => s + (p.valor || 0) * (p.qtd || 1), 0);
-  const mo = parseFloat(document.getElementById('oMO')?.value) || 0;
+  const mo = Math.max(0, parseFloat(document.getElementById('oMO')?.value) || 0);
   const el = document.getElementById('oOrc');
   if (el) el.value = (tp + mo).toFixed(2);
 }
