@@ -659,17 +659,17 @@ function renderPecas() {
           <td style="padding:6px 8px">
             <input class="inp" style="padding:6px 10px;font-size:12px;width:70px" type="number"
               value="${p.qtd}" min="1"
-              oninput="pecasT[${i}].qtd=Math.max(1,parseInt(this.value)||1);calcOrc()"
+              oninput="pecasT[${i}].qtd=Math.max(1,parseInt(this.value)||1);atualizarTotalLinha(${i});calcOrc()"
               aria-label="Quantidade da peça ${i+1}" />
           </td>
           <td style="padding:6px 8px">
             <input class="inp" style="padding:6px 10px;font-size:12px;width:110px" type="number"
               id="peca-valor-${i}"
               value="${p.valor}" min="0" step="0.01"
-              oninput="pecasT[${i}].valor=Math.max(0,parseFloat(this.value)||0);calcOrc()"
+              oninput="pecasT[${i}].valor=Math.max(0,parseFloat(this.value)||0);atualizarTotalLinha(${i});calcOrc()"
               aria-label="Valor unitário da peça ${i+1}" />
           </td>
-          <td style="padding:6px 10px;font-family:var(--font-mono);font-size:12px;color:var(--green)">${fc(p.valor * p.qtd)}</td>
+          <td style="padding:6px 10px;font-family:var(--font-mono);font-size:12px;color:var(--green)" id="peca-total-${i}">${fc(p.valor * p.qtd)}</td>
           <td style="padding:6px 4px">
             <button type="button" class="btn btn-ghost btn-xs" style="color:var(--rose)"
               onclick="removePeca(${i})" aria-label="Remover peça ${i+1}">
@@ -710,38 +710,65 @@ async function buscarPecasFlowgate(indice, termo) {
   if (!dropdown) return;
 
   try {
-    const res  = await fetch(`/api/flowgate/pecas?q=${encodeURIComponent(termo)}&por_pagina=8`);
-    const data = await res.json();
+    const [resFlowgate, resEstoque] = await Promise.allSettled([
+      fetch(`/api/flowgate/pecas?q=${encodeURIComponent(termo)}&por_pagina=6`).then(r => r.json()),
+      fetch(`/api/estoque?busca=${encodeURIComponent(termo)}&por_pagina=4`).then(r => r.json()),
+    ]);
 
-    if (!res.ok || !data.pecas?.length) {
-      dropdown.innerHTML = '<li style="padding:8px 12px;font-size:12px;color:var(--text-faint)">Nenhuma peça encontrada.</li>';
-      dropdown.style.display = 'block';
-      return;
-    }
+    const pecas_flowgate = resFlowgate.status === 'fulfilled' ? (resFlowgate.value.pecas || []) : [];
+    const pecas_estoque  = resEstoque.status  === 'fulfilled' ? (resEstoque.value.produtos || []) : [];
 
-    dropdown.innerHTML = data.pecas.map(p => `
+    const itens_flowgate = pecas_flowgate.map(p => `
       <li role="option"
           style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border-subtle)"
-          data-nome="${esc(p.nome)}" data-preco="${p.preco}" onmousedown="selecionarPecaEl(${indice}, this)"
-          title="${esc(p.sku)} · ${esc(p.fornecedora.nome)}">
-        <div style="font-weight:500;color:var(--text-primary)">${esc(p.nome)}</div>
-        <div style="color:var(--text-faint);font-size:11px;font-family:var(--font-mono)">
-          ${esc(p.sku)} · R$ ${p.preco.toFixed(2)} · ${esc(p.fornecedora.nome)}
+          data-nome="${esc(p.nome)}"
+          data-preco="${p.preco}"
+          onmousedown="selecionarPecaEl(${indice}, this)"
+          title="${esc(p.sku)} · ${esc(p.fornecedora?.nome ?? '')}">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(99,102,241,.2);color:#a5b4fc;font-family:var(--font-mono);letter-spacing:.05em">FLOWGATE</span>
+          <span style="font-weight:500;color:var(--text-primary)">${esc(p.nome)}</span>
         </div>
-      </li>
-    `).join('');
+        <div style="color:var(--text-faint);font-size:11px;font-family:var(--font-mono);margin-top:2px">
+          ${esc(p.sku)} · R$ ${p.preco.toFixed(2)} · ${esc(p.fornecedora?.nome ?? '')}
+        </div>
+      </li>`).join('');
+
+    const itens_estoque = pecas_estoque.map(p => `
+      <li role="option"
+          style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border-subtle)"
+          data-nome="${esc(p.nome)}"
+          data-preco="${p.preco}"
+          onmousedown="selecionarPecaEl(${indice}, this)"
+          title="Estoque interno">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(34,197,94,.15);color:#86efac;font-family:var(--font-mono);letter-spacing:.05em">ESTOQUE</span>
+          <span style="font-weight:500;color:var(--text-primary)">${esc(p.nome)}</span>
+        </div>
+        <div style="color:var(--text-faint);font-size:11px;font-family:var(--font-mono);margin-top:2px">
+          R$ ${Number(p.preco).toFixed(2)} · ${p.stock} em estoque
+        </div>
+      </li>`).join('');
+
+    const todos = itens_flowgate + itens_estoque;
+
+    dropdown.innerHTML = todos || '<li style="padding:8px 12px;font-size:12px;color:var(--text-faint)">Nenhuma peça encontrada.</li>';
     dropdown.style.display = 'block';
 
   } catch {
-    dropdown.innerHTML = '<li style="padding:8px 12px;font-size:12px;color:var(--rose)">Catálogo indisponível.</li>';
+    dropdown.innerHTML = '<li style="padding:8px 12px;font-size:12px;color:var(--rose)">Erro ao buscar peças.</li>';
     dropdown.style.display = 'block';
   }
 }
 
 function selecionarPecaEl(indice, el) {
-  const nome  = el.dataset.nome  || '';
-  const preco = Math.max(0, parseFloat(el.dataset.preco) || 0);
-  selecionarPeca(indice, nome, preco);
+  selecionarPeca(indice, el.dataset.nome || '', Math.max(0, parseFloat(el.dataset.preco) || 0));
+}
+
+function atualizarTotalLinha(indice) {
+  const p   = pecasT[indice];
+  const cel = document.getElementById(`peca-total-${indice}`);
+  if (cel) cel.textContent = fc((p.valor || 0) * (p.qtd || 1));
 }
 
 function selecionarPeca(indice, nome, preco) {

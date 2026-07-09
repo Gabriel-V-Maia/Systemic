@@ -151,6 +151,29 @@ INSERT INTO pecas (id_fornecedora, id_categoria, nome, codigo_sku, descricao, pr
     (3, 6, 'Jogo de Velas NGK BKR5E',            'VL-NGK-5E',  'Conjunto com 4 velas, eletrodo de cobre.',                    72.00,  70, 'jogo'),
     (1, 7, 'Correia Dentada Gates 5476XS',       'CD-GT-5476', 'Kit correia + tensor, motores 1.6 16v.',                     145.00,  35, 'kit');
 
+-- Peças adicionais para testes
+INSERT INTO pecas (id_fornecedora, id_categoria, nome, codigo_sku, descricao, preco, estoque, unidade) VALUES
+    (1, 1, 'Filtro de Óleo Mann W7008',           'FO-MN-7008',  'Filtro de óleo Mann, compatível com VW, Audi 1.4 a 2.0.',       38.50,  60, 'un'),
+    (2, 2, 'Óleo Castrol GTX 10W-40 1L',          'OL-CS-10W40', 'Óleo mineral, API SN, ideal para frotas.',                      45.90, 150, 'litro'),
+    (3, 3, 'Pastilha de Freio Traseira Fras-le',   'PF-FL-T01',   'Eixo traseiro, compatível com Civic, Corolla 2015+.',           88.00,  40, 'jogo'),
+    (1, 4, 'Amortecedor Traseiro Monroe',          'AM-MN-T55',   'Gas-Magnum, eixo traseiro, universal.',                        195.00,  20, 'un'),
+    (2, 5, 'Alternador Bosch 14V 90A',             'AL-BS-90A',   'Remanufaturado, compatível com motores 1.6 a 2.0.',            520.00,   8, 'un'),
+    (3, 6, 'Junta do Cabeçote Vedamotors',         'JC-VM-01',    'Kit completo, compatível com motores Flex 1.0 a 1.4.',         210.00,  12, 'jogo'),
+    (1, 7, 'Correia Poly-V Gates 6PK1750',         'CP-GT-1750',  'Correia acessórios, comprimento 1750mm, 6 nervuras.',          89.00,  45, 'un'),
+    (2, 8, 'Rolamento de Roda Dianteiro SNR',      'RR-SN-D02',   'Com abs, eixo dianteiro, compatível com Onix, HB20.',         145.00,  30, 'un'),
+    (3, 1, 'Filtro de Cabine Tecfil ACP203',       'FC-TC-C203',  'Filtro de ar condicionado, carvão ativado.',                   55.00,  80, 'un'),
+    (1, 2, 'Fluido de Transmissão Automática Mobil','FT-MB-ATF',  'Dexron VI, compatível com câmbios automáticos e CVT.',         89.90,  50, 'litro'),
+    (2, 3, 'Disco de Freio Sólido Fremax',         'DF-FM-S08',   'Par traseiro, 260mm, sólido.',                                165.00,  18, 'par'),
+    (3, 5, 'Vela de Ignição NGK Iridium BKR6EIX',  'VL-NGK-IX6',  'Iridium, vida útil 100.000 km, conjunto com 4 velas.',        189.00,  35, 'jogo'),
+    (1, 6, 'Bomba d'''Água Gates GWP180',         'BA-GT-180',   'Bomba d'''água com junta, compatível com 1.6 16v Flex.',     198.00,  10, 'un'),
+    (2, 4, 'Barra Estabilizadora Cofap',           'BE-CF-D01',   'Dianteira, com buchas e terminais, universal.',               320.00,   6, 'jogo'),
+    (3, 7, 'Kit Distribuição Dayco KTB486',        'KD-DC-486',   'Correia, tensor e bomba d'''água, motores 1.4/1.6 Flex.',    485.00,  14, 'kit'),
+    (1, 8, 'Cubo de Roda Traseiro SKF VKBA3546',   'CR-SK-3546',  'Com rolamento integrado, eixo traseiro.',                     285.00,   9, 'un'),
+    (2, 1, 'Filtro de Combustível Mahle KL180',    'FC-MH-180',   'Para motores gasolina e flex 2010 em diante.',                 42.00,  55, 'un'),
+    (3, 2, 'Graxa de Rolamento Lubrax EP-2 400g',  'GR-LX-EP2',   'Graxa de lítio para rolamentos em geral.',                    28.50, 200, 'un'),
+    -- Peça especial de teste
+    (1, 8, 'Flux Capacitor',        'FC-DL-88',    'Componente essencial para viagem no tempo. 1,21 gigawatts.', 9999.99,   1, 'un');
+
 -- ============================================================
 -- FIM DO SCRIPT
 -- ============================================================
