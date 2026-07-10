@@ -68,6 +68,61 @@
       border-color: var(--red-vivid);
       color: #fff;
     }
+
+    /* Abas de seção (Peças / Produtos) — mesmo padrão visual do .chip,
+       porém maiores, para funcionar como navegação primária da página. */
+    .secao-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 16px;
+    }
+
+    .secao-tab {
+      padding: 8px 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-dim);
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .03em;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .secao-tab:hover {
+      color: var(--off-white);
+      border-color: var(--border-mid);
+    }
+
+    .secao-tab.ativa {
+      background: var(--red-vivid);
+      border-color: var(--red-vivid);
+      color: #fff;
+      box-shadow: var(--shadow-red);
+    }
+
+    .secao-painel { display: none; }
+    .secao-painel.ativa { display: block; }
+
+    .origem-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: rgba(100,180,255,.15);
+      color: #64b4ff;
+      font-family: var(--font-mono);
+      letter-spacing: .05em;
+    }
   </style>
 </head>
 <body>
@@ -157,67 +212,178 @@
       <small>Módulo de Operações</small>
       Esto<span class="pt-acc">que</span>
     </div>
-    <div class="ph-actions">
-      <button class="btn btn-outline" onclick="carregarEstoque()" title="Atualizar" aria-label="Atualizar lista">
-        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Atualizar
+  </div>
+
+  <div class="secao-tabs" role="tablist" aria-label="Seções do estoque">
+    <button class="secao-tab ativa" id="tabPecas" role="tab" aria-selected="true" aria-controls="painelPecas">
+      <i class="bi bi-nut" aria-hidden="true"></i>Peças
+    </button>
+    <button class="secao-tab" id="tabProdutos" role="tab" aria-selected="false" aria-controls="painelProdutos">
+      <i class="bi bi-shop" aria-hidden="true"></i>Produtos
+    </button>
+  </div>
+
+  <!-- ===================== PAINEL: PEÇAS (estoque técnico interno) ===================== -->
+  <section class="secao-painel ativa" id="painelPecas" role="tabpanel" aria-labelledby="tabPecas">
+
+    <div class="toolbar" role="search" aria-label="Filtros de peças">
+      <div class="search-wrap">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input class="inp inp-search" type="search" id="searchPecas"
+               placeholder="Buscar peça..."
+               aria-label="Buscar peça" autocomplete="off">
+      </div>
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-faint);margin-left:auto" id="countPecas">—</span>
+      <button class="btn btn-primary" id="btnNovaPeca" style="display:none" aria-label="Cadastrar nova peça">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>Nova Peça
       </button>
-      <button class="btn btn-primary" id="btnNovo" style="display:none" aria-label="Cadastrar novo produto">
-        <i class="bi bi-plus-lg" aria-hidden="true"></i>Novo Produto
-      </button>
-    </div>
-  </div>
-
-  <div class="toolbar" role="search" aria-label="Filtros">
-    <div class="search-wrap">
-      <i class="bi bi-search" aria-hidden="true"></i>
-      <input class="inp inp-search" type="search" id="searchInput"
-             placeholder="Buscar produto..."
-             aria-label="Buscar produto" autocomplete="off">
-    </div>
-    <div class="filter-chips">
-      <button class="chip ativo" data-cat="">Todos</button>
-      <button class="chip" data-cat="pecas">Peças</button>
-      <button class="chip" data-cat="fluidos">Fluidos</button>
-      <button class="chip" data-cat="eletrico">Elétrico</button>
-    </div>
-    <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-faint);margin-left:auto" id="countLabel">—</span>
-  </div>
-
-  <div class="card">
-    <div class="card-head">
-      <i class="bi bi-boxes" style="color:var(--red-vivid);font-size:16px" aria-hidden="true"></i>
-      <span class="card-title">Produtos em Estoque</span>
-      <div style="margin-left:auto;display:flex;gap:6px" id="paginacao"></div>
     </div>
 
-    <div class="table-wrap">
-      <table class="tbl" aria-label="Tabela de estoque">
-        <thead>
-          <tr>
-            <th scope="col" style="width:48px"></th>
-            <th scope="col">Produto</th>
-            <th scope="col">Categoria</th>
-            <th scope="col">Preço</th>
-            <th scope="col">Estoque</th>
-            <th scope="col" style="width:100px">Ações</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyEstoque">
-          <tr>
-            <td colspan="6">
-              <div class="empty">
-                <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
-                <h4>Carregando...</h4>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="card">
+      <div class="card-head">
+        <i class="bi bi-nut" style="color:var(--red-vivid);font-size:16px" aria-hidden="true"></i>
+        <span class="card-title">Peças em Estoque</span>
+        <div style="margin-left:auto;display:flex;gap:6px" id="paginacaoPecas"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="tbl" aria-label="Tabela de peças">
+          <thead>
+            <tr>
+              <th scope="col">Peça</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Fornecedor</th>
+              <th scope="col">Quantidade</th>
+              <th scope="col" style="width:100px">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyPecas">
+            <tr>
+              <td colspan="5">
+                <div class="empty">
+                  <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                  <h4>Carregando...</h4>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <!-- ===================== PAINEL: PRODUTOS (vitrine pública) ===================== -->
+  <section class="secao-painel" id="painelProdutos" role="tabpanel" aria-labelledby="tabProdutos">
+
+    <div class="toolbar" role="search" aria-label="Filtros de produtos">
+      <div class="search-wrap">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input class="inp inp-search" type="search" id="searchProdutos"
+               placeholder="Buscar produto..."
+               aria-label="Buscar produto" autocomplete="off">
+      </div>
+      <div class="filter-chips">
+        <button class="chip ativo" data-cat="">Todos</button>
+        <button class="chip" data-cat="pecas">Peças</button>
+        <button class="chip" data-cat="fluidos">Fluidos</button>
+        <button class="chip" data-cat="eletrico">Elétrico</button>
+      </div>
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-faint);margin-left:auto" id="countProdutos">—</span>
+      <div class="ph-actions" id="acoesProdutos" style="display:none">
+        <button class="btn btn-outline" id="btnPublicarPeca" aria-label="Publicar peça como produto">
+          <i class="bi bi-box-arrow-up" aria-hidden="true"></i>Publicar da Peça
+        </button>
+        <button class="btn btn-primary" id="btnNovoProduto" aria-label="Cadastrar novo produto">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>Novo Produto
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <i class="bi bi-shop" style="color:var(--red-vivid);font-size:16px" aria-hidden="true"></i>
+        <span class="card-title">Produtos na Vitrine</span>
+        <div style="margin-left:auto;display:flex;gap:6px" id="paginacaoProdutos"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="tbl" aria-label="Tabela de produtos">
+          <thead>
+            <tr>
+              <th scope="col" style="width:48px"></th>
+              <th scope="col">Produto</th>
+              <th scope="col">Categoria</th>
+              <th scope="col">Preço</th>
+              <th scope="col">Estoque</th>
+              <th scope="col" style="width:100px">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyProdutos">
+            <tr>
+              <td colspan="6">
+                <div class="empty">
+                  <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                  <h4>Carregando...</h4>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
 </div>
 </main>
+
+<!-- Modal Peça -->
+<div class="modal fade" id="mPeca" tabindex="-1" aria-labelledby="mPecaLbl" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="mPecaLbl">
+          <i class="bi bi-nut" style="color:var(--red-vivid);margin-right:8px" aria-hidden="true"></i>
+          <span id="mPecaTit">Nova Peça</span>
+        </h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="vmsg" id="vMsgPeca" role="alert">
+          <i class="bi bi-exclamation-circle-fill" style="font-size:18px;flex-shrink:0" aria-hidden="true"></i>
+          <span id="vTxtPeca"></span>
+        </div>
+        <input type="hidden" id="pecaId">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label" for="inputNomePeca">Nome da peça *</label>
+            <input class="form-control" type="text" id="inputNomePeca" placeholder="Ex: Filtro de óleo Mann W712" required maxlength="255">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="inputTipoPeca">Tipo</label>
+            <input class="form-control" type="text" id="inputTipoPeca" placeholder="Ex: filtro, motor, suspensão..." maxlength="100">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="inputQuantidadePeca">Quantidade *</label>
+            <input class="form-control" type="number" id="inputQuantidadePeca" min="0" step="1" placeholder="0" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="selectFornecedorPeca">Fornecedor *</label>
+            <select class="form-select" id="selectFornecedorPeca" required>
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span style="flex:1;font-family:var(--font-mono);font-size:11px;color:var(--text-faint)">* Campos obrigatórios</span>
+        <button class="btn btn-outline" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" id="btnSalvarPeca">
+          <i class="bi bi-floppy" aria-hidden="true"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Produto -->
 <div class="modal fade" id="mProd" tabindex="-1" aria-labelledby="mProdLbl" aria-modal="true" role="dialog">
@@ -236,6 +402,20 @@
           <span id="vTxt"></span>
         </div>
         <input type="hidden" id="produtoId">
+        <input type="hidden" id="pecaOrigemId">
+
+        <div class="row g-3" id="blocoOrigemPeca" style="display:none">
+          <div class="col-12">
+            <div class="origem-badge" style="font-size:11px;padding:6px 10px;width:100%;justify-content:flex-start">
+              <i class="bi bi-link-45deg" aria-hidden="true"></i>
+              Publicando a partir da peça: <strong id="nomeOrigemPeca" style="margin-left:4px"></strong>
+              <button type="button" class="btn btn-ghost btn-xs" style="margin-left:auto" id="btnRemoverOrigemPeca" aria-label="Remover vínculo com a peça">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="row g-3">
           <div class="col-12">
             <label class="form-label" for="inputNome">Nome *</label>
@@ -290,20 +470,43 @@
   </div>
 </div>
 
+<!-- Modal Selecionar Peça para Publicar -->
+<div class="modal fade" id="mSelecionarPeca" tabindex="-1" aria-labelledby="mSelecionarPecaLbl" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="mSelecionarPecaLbl">
+          <i class="bi bi-box-arrow-up" style="color:var(--red-vivid);margin-right:8px" aria-hidden="true"></i>
+          Publicar Peça como Produto
+        </h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label" for="buscaPecaPublicar">Buscar peça no estoque interno</label>
+        <input class="form-control" type="search" id="buscaPecaPublicar" placeholder="Digite ao menos 2 letras..." autocomplete="off">
+        <ul id="resultadoPecaPublicar" style="list-style:none;padding:0;margin:12px 0 0;max-height:280px;overflow-y:auto"></ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Confirmar Exclusão -->
 <div class="modal fade" id="mExc" tabindex="-1" aria-labelledby="mExcLbl" aria-modal="true" role="alertdialog">
   <div class="modal-dialog modal-dialog-centered" style="max-width:440px">
     <div class="modal-content">
       <div class="modal-header">
         <h2 class="modal-title" id="mExcLbl" style="color:var(--rose)">
-          <i class="bi bi-trash3" style="margin-right:8px" aria-hidden="true"></i>Remover Produto
+          <i class="bi bi-trash3" style="margin-right:8px" aria-hidden="true"></i><span id="mExcTit">Remover</span>
         </h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
       <div class="modal-body" style="text-align:center;padding:32px 24px">
         <div style="font-size:48px;margin-bottom:16px" aria-hidden="true">🗑️</div>
         <p style="font-size:14px;color:var(--chrome-dim);line-height:1.6">
-          Remover <strong id="excNome" style="color:var(--red-vivid)"></strong> do estoque?<br/>
+          Remover <strong id="excNome" style="color:var(--red-vivid)"></strong>?<br/>
           Esta ação <strong>não pode ser desfeita</strong>.
         </p>
       </div>
