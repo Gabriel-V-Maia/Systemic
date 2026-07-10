@@ -686,6 +686,22 @@ function renderPecas() {
 function addPeca()     { pecasT.push({ nome:'', qtd:1, valor:0 }); renderPecas(); }
 function removePeca(i) { pecasT.splice(i, 1); renderPecas(); }
 
+// Garante que o dropdown fique visível dentro do scroll interno do modal
+// (o modal usa .modal-dialog-scrollable, então o scroll da página não
+// alcança o dropdown sozinho — precisa rolar o container correto).
+function garantirDropdownVisivel(dropdown) {
+  const scrollArea = dropdown.closest('.modal-body') || dropdown.parentElement;
+  if (!scrollArea) return;
+
+  const areaRect = scrollArea.getBoundingClientRect();
+  const dropRect = dropdown.getBoundingClientRect();
+  const espacoFaltando = dropRect.bottom - areaRect.bottom;
+
+  if (espacoFaltando > 0) {
+    scrollArea.scrollTop += espacoFaltando + 12; // 12px de folga
+  }
+}
+
 function agendarBuscaPeca(indice, termo) {
   pecasT[indice].nome = termo;
 
@@ -705,6 +721,7 @@ function agendarBuscaPeca(indice, termo) {
       <span style="font-size:11.5px;color:var(--text-faint)">Buscando…</span>
     </li>`;
   dropdown.style.display = 'block';
+  requestAnimationFrame(() => garantirDropdownVisivel(dropdown));
 
   peca_timers[indice] = setTimeout(() => buscarPecasFlowgate(indice, termo.trim()), 300);
 }
@@ -775,6 +792,7 @@ async function buscarPecasFlowgate(indice, termo) {
         <div style="font-size:11.5px;color:var(--text-faint);margin-top:6px">Nenhuma peça encontrada.</div>
       </li>`;
     dropdown.style.display = 'block';
+    requestAnimationFrame(() => garantirDropdownVisivel(dropdown));
  
   } catch {
     dropdown.innerHTML = `
@@ -783,6 +801,7 @@ async function buscarPecasFlowgate(indice, termo) {
         <div style="font-size:11.5px;color:var(--rose);margin-top:5px">Erro ao buscar peças.</div>
       </li>`;
     dropdown.style.display = 'block';
+    requestAnimationFrame(() => garantirDropdownVisivel(dropdown));
   }
 }
 
