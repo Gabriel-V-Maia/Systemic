@@ -9,7 +9,19 @@ use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
 use Automax\Support\Logger;
 
-class EstoqueController
+/**
+ * CRUD dos produtos da vitrine pública (tabela `produtos`).
+ *
+ * Produto != Peça: produto é o item exposto na loja, com preço, imagem e
+ * descrição comercial. Pode existir de duas formas:
+ *   - cadastro direto, sem relação com o estoque interno;
+ *   - publicado a partir de uma peça do estoque interno (`pecas`), quando
+ *     o funcionário usa "Publicar da peça". Nesse caso a origem fica
+ *     registrada em `produto_peca_origem`, mas preço/imagem/descrição são
+ *     sempre definidos no momento da publicação — a peça em si nunca tem
+ *     esses campos.
+ */
+class ProdutoEstoqueController
 {
     private const IMAGEM_DIR      = '/var/www/html/automax/uploads/produtos/';
     private const IMAGEM_URL      = '/uploads/produtos/';
@@ -72,7 +84,7 @@ class EstoqueController
                 'paginas'    => (int) ceil($total / $por_pagina),
             ]);
         } catch (DatabaseException $e) {
-            error_log('[EstoqueController] listar: ' . $e->getMessage());
+            error_log('[ProdutoEstoqueController] listar: ' . $e->getMessage());
             self::json(503, ['erro' => 'Serviço indisponível.']);
         }
     }
@@ -149,19 +161,40 @@ class EstoqueController
             return;
         }
 
+        $id_peca_origem = self::validar_int_positivo($body['id_peca_origem'] ?? '');
+        $db = null;
+
         try {
             $db = Database::get_instance();
+
+            if ($id_peca_origem !== false && !self::peca_existe($db, $id_peca_origem)) {
+                self::json(422, ['erro' => 'Peça de origem selecionada não existe.']);
+                return;
+            }
+
+            $db->begin_transaction();
+
             $id = $db->insert(
                 'INSERT INTO produtos (nome, preco, stock, imagem, categoria, detalhes)
                  VALUES (:nome, :preco, :stock, :imagem, :categoria, :detalhes)',
                 self::extrair_params($body)
             );
 
-            Logger::registrar("Produto \"{$body['nome']}\" cadastrado no estoque (categoria: {$body['categoria']}).");
+            if ($id_peca_origem !== false) {
+                $db->execute(
+                    'INSERT INTO produto_peca_origem (id_produto, id_peca) VALUES (:id_produto, :id_peca)',
+                    [':id_produto' => $id, ':id_peca' => $id_peca_origem]
+                );
+            }
+
+            $db->commit();
+
+            Logger::registrar("Produto \"{$body['nome']}\" cadastrado na vitrine (categoria: {$body['categoria']}).");
 
             self::json(201, ['id_produto' => $id, 'mensagem' => 'Produto criado com sucesso.']);
         } catch (DatabaseException $e) {
-            error_log('[EstoqueController] criar: ' . $e->getMessage());
+            $db?->rollback();
+            error_log('[ProdutoEstoqueController] criar: ' . $e->getMessage());
             self::json(503, ['erro' => 'Serviço indisponível.']);
         }
     }
@@ -201,7 +234,7 @@ class EstoqueController
                 'detalhes'  =>         $produto['detalhes'],
             ]);
         } catch (DatabaseException $e) {
-            error_log('[EstoqueController] buscar: ' . $e->getMessage());
+            error_log('[ProdutoEstoqueController] buscar: ' . $e->getMessage());
             self::json(503, ['erro' => 'Serviço indisponível.']);
         }
     }
@@ -248,7 +281,7 @@ class EstoqueController
 
             self::json(200, ['mensagem' => 'Produto atualizado com sucesso.']);
         } catch (DatabaseException $e) {
-            error_log('[EstoqueController] atualizar: ' . $e->getMessage());
+            error_log('[ProdutoEstoqueController] atualizar: ' . $e->getMessage());
             self::json(503, ['erro' => 'Serviço indisponível.']);
         }
     }
@@ -305,7 +338,7 @@ class EstoqueController
 
             self::json(200, ['stock' => $novo_stock, 'mensagem' => 'Estoque ajustado.']);
         } catch (DatabaseException $e) {
-            error_log('[EstoqueController] ajustar_stock: ' . $e->getMessage());
+            error_log('[ProdutoEstoqueController] ajustar_stock: ' . $e->getMessage());
             self::json(503, ['erro' => 'Serviço indisponível.']);
         }
     }
@@ -338,11 +371,11 @@ class EstoqueController
                 return;
             }
 
-            Logger::registrar("Produto \"{$produto['nome']}\" removido do estoque.");
+            Logger::registrar("Produto \"{$produto['nome']}\" removido da vitrine.");
 
             self::json(200, ['mensagem' => 'Produto removido do estoque.']);
         } catch (DatabaseException $e) {
-            error_log('[EstoqueController] deletar: ' . $e->getMessage());
+            error_log('[ProdutoEstoqueController] deletar: ' . $e->getMessage());
             self::json(503, ['erro' => 'Serviço indisponível.']);
         }
     }
@@ -432,6 +465,14 @@ class EstoqueController
             ':categoria' => trim($body['categoria']),
             ':detalhes'  => trim($body['detalhes']),
         ];
+    }
+
+    private static function peca_existe(Database $db, int $id_peca): bool
+    {
+        return $db->query_one(
+            'SELECT 1 FROM pecas WHERE id_peca = :id LIMIT 1',
+            [':id' => $id_peca]
+        ) !== null;
     }
 
     private static function validar_int_positivo(mixed $valor): int|false
