@@ -52,8 +52,16 @@ $params = [];
 
 if ($termo !== '') {
     $like = '%' . $termo . '%';
-    $where[] = '(p.nome LIKE :like OR p.codigo_sku LIKE :like OR p.descricao LIKE :like)';
-    $params[':like'] = $like;
+
+    $where[] = '(
+        p.nome LIKE :like_nome
+        OR p.codigo_sku LIKE :like_sku
+        OR p.descricao LIKE :like_descricao
+    )';
+
+    $params[':like_nome'] = $like;
+    $params[':like_sku'] = $like;
+    $params[':like_descricao'] = $like;
 }
 
 if ($slug_categoria !== '') {
@@ -132,8 +140,11 @@ try {
     error_log('[Flowgate /api/pecas] DB: ' . $e->getMessage());
     responder(500, ['erro' => 'Erro interno. Tente novamente.']);
 } catch (\Throwable $e) {
-    error_log('[Flowgate /api/pecas] ' . $e->getMessage());
-    responder(500, ['erro' => 'Erro interno inesperado.']);
+    responder(500, [
+        'erro' => $e->getMessage(),
+        'arquivo' => $e->getFile(),
+        'linha' => $e->getLine()
+    ]);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
