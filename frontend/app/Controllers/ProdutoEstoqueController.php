@@ -126,15 +126,25 @@ class ProdutoEstoqueController
         }
 
         if (!is_dir(self::IMAGEM_DIR) && !@mkdir(self::IMAGEM_DIR, 0755, true) && !is_dir(self::IMAGEM_DIR)) {
+            imagedestroy($imagem_src);
             self::json(500, ['erro' => 'Não foi possível criar o diretório de uploads.']);
+            return;
+        }
+
+        if (!is_writable(self::IMAGEM_DIR)) {
+            imagedestroy($imagem_src);
+            error_log('[ProdutoEstoqueController] diretório sem permissão de escrita: ' . self::IMAGEM_DIR);
+            self::json(500, ['erro' => 'Diretório de uploads sem permissão de escrita. Contate o administrador.']);
             return;
         }
 
         $nome_arquivo = uniqid('prod_', true) . '.webp';
         $caminho      = self::IMAGEM_DIR . $nome_arquivo;
 
-        if (!imagewebp($imagem_src, $caminho, 85)) {
+        if (!@imagewebp($imagem_src, $caminho, 85)) {
             imagedestroy($imagem_src);
+            $erro_php = error_get_last();
+            error_log('[ProdutoEstoqueController] imagewebp falhou: ' . ($erro_php['message'] ?? 'motivo desconhecido'));
             self::json(500, ['erro' => 'Falha ao salvar a imagem.']);
             return;
         }
